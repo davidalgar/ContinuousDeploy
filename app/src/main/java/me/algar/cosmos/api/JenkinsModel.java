@@ -6,13 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.algar.cosmos.api.models.Build;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by David on 3/3/16.

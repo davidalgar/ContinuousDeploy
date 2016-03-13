@@ -6,21 +6,23 @@ import me.algar.cosmos.api.models.Build;
 import me.algar.cosmos.api.models.Job;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
  * Created by David on 3/10/16.
  */
 public interface JenkinsApi {
-    String JENKINS = "http://127.0.0.1:8080/";
+    String JENKINS = "http://10.0.2.2:8080/";
+//    String JENKINS = "http://jsonplaceholder.typicode.com";
 
-    @GET("api/json?tree=jobs[name,color]{{start},{end}}")
-    Observable<List<Job>> getJobs(@Path("start") int startIndex, @Path("end") int endIndex);
+    @GET("api/json?tree=jobs[name,color]")
+    Observable<List<Job>> getJobs();
 
-    //https://builds.apache.org/job/Abdera-trunk/api/json?tree=builds[number]&pretty=true
-    @GET("job/{job}/api/json?tree=jobs{{start},{end}}")
-    Observable<Job> getJob(@Path("job") String job, @Path("start") int startIndex, @Path("end") int endIndex);
+    @GET("job/{job}/api/json") //{{start},{end}}
+//    @GET("posts")
+    Observable<Job> getJob(@Path("job") String job);
 
-    @GET("job/{job}/{buildId}/api/json?tree=artifacts[*],changeSet[items[msg,author[fullName]]],result{{start},{end}}")
-    Observable<Build> getBuild(@Path("job") String job, @Path("buildId") int buildId);
+    @GET("job/{job}/{buildId}/api/json")
+    Observable<Build> getBuild(@Path("job") String job, @Path("buildId") int buildId, @Query("tree") String tree);
 }

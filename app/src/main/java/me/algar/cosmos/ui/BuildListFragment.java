@@ -22,6 +22,7 @@ import me.algar.cosmos.api.models.Job;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class BuildListFragment extends BaseFragment {
     //region Views
@@ -32,7 +33,7 @@ public class BuildListFragment extends BaseFragment {
     //endregion
 
     private RecyclerView.Adapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private LinearLayoutManager layoutManager;
     private Subscription buildSubscription;
 
     private BuildListViewModel viewModel;
@@ -69,6 +70,14 @@ public class BuildListFragment extends BaseFragment {
         adapter = new BuildListAdapter(builds, getContext());
         buildListView.setAdapter(adapter);
         buildListView.setItemAnimator(new SlideInUpAnimator());
+
+        buildListView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                //TODO
+//                viewModel.loadBuilds(totalItemsCount);
+            }
+        });
     }
 
     private void setupRefresh(){
@@ -108,6 +117,10 @@ public class BuildListFragment extends BaseFragment {
 
         @Override
         public void onNext(Job userDataResponse) {
+            builds.addAll(userDataResponse.builds);
+            adapter.notifyItemRangeInserted(startIndex, userDataResponse.builds.size());
+            startIndex += userDataResponse.builds.size();
+
             showMessage(getContext().getString(R.string.load_complete));
         }
     }

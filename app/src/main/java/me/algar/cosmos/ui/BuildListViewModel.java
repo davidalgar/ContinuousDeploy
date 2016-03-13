@@ -18,6 +18,6 @@ public class BuildListViewModel {
     }
 
     public void loadBuilds(int startIndex){
-        requestManager.getJob("Cosmos%20-%20development", startIndex).subscribe(buildDataSubject);
+        requestManager.getJob("Cosmos - development", startIndex).subscribe(buildDataSubject);
     }
 }
