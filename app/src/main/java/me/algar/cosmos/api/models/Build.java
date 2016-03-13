@@ -18,6 +18,7 @@ public class Build {
         this.number = id;
         this.url = url;
         this.commits.addAll(commits);
+        this.status = status;
     }
 
     public String getResponsible(){

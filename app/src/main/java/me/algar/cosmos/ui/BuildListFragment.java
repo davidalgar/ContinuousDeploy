@@ -18,6 +18,7 @@ import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsModel;
 import me.algar.cosmos.api.JenkinsRequestManager;
 import me.algar.cosmos.api.models.Build;
+import me.algar.cosmos.api.models.Job;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -34,13 +35,14 @@ public class BuildListFragment extends BaseFragment {
     private RecyclerView.LayoutManager layoutManager;
     private Subscription buildSubscription;
 
-    private BuildViewModel viewModel;
+    private BuildListViewModel viewModel;
     private List<Build> builds;
+    private int startIndex = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.viewModel = new BuildViewModel(new JenkinsRequestManager());
+        this.viewModel = new BuildListViewModel(new JenkinsRequestManager());
     }
 
     @Nullable
@@ -73,7 +75,8 @@ public class BuildListFragment extends BaseFragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                viewModel.loadBuilds();
+                startIndex = 0;
+                viewModel.loadBuilds(startIndex);
             }
         });
     }
@@ -85,7 +88,7 @@ public class BuildListFragment extends BaseFragment {
                 .subscribe(new BuildSubscriber());
     }
 
-    private class BuildSubscriber extends Subscriber<Object> {
+    private class BuildSubscriber extends Subscriber<Job> {
 
         @Override
         public void onCompleted() {
@@ -104,7 +107,7 @@ public class BuildListFragment extends BaseFragment {
         }
 
         @Override
-        public void onNext(Object userDataResponse) {
+        public void onNext(Job userDataResponse) {
             showMessage(getContext().getString(R.string.load_complete));
         }
     }
