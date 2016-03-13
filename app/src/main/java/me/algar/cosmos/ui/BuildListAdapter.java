@@ -1,4 +1,4 @@
-package me.algar.cosmos;
+package me.algar.cosmos.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -11,11 +11,9 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import me.algar.cosmos.api.Build;
+import me.algar.cosmos.R;
+import me.algar.cosmos.api.models.Build;
 
-/**
- * Created by David on 3/8/16.
- */
 public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.ViewHolder> {
     private final Context context;
     private List<Build> buildList;

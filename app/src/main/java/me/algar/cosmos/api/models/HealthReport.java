@@ -1,5 +1,5 @@
 
-package me.algar.cosmos.api;
+package me.algar.cosmos.api.models;
 
 
 

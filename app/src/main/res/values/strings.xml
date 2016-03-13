@@ -15,4 +15,5 @@
     </string>
     <string name="success">Success</string>
     <string name="failure">Failure</string>
+    <string name="load_complete">Refresh Complete</string>
 </resources>

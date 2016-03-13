@@ -1,6 +1,8 @@
 package me.algar.cosmos.api;
 
+import me.algar.cosmos.api.models.Job;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import rx.Observable;
 
 /**
@@ -9,8 +11,6 @@ import rx.Observable;
 public interface JenkinsApi {
     String JENKINS = "http://127.0.0.1:8080/";
 
-    //TODO parameterize jobname
-    //http://127.0.0.1:8080/job/Cosmos%20-%20development/api/json?pretty=true
-    @GET("job/Cosmos%20-%20development/api/json?pretty=true")
-    Observable<Job> getJob();
+    @GET("job/{job}/api/json?pretty=true")
+    Observable<Job> getJob(@Path("job") String job);
 }
