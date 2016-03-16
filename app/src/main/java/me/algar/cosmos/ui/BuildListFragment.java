@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class BuildListFragment extends BaseFragment {
     //region Views
@@ -44,6 +46,7 @@ public class BuildListFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.viewModel = new BuildListViewModel(new JenkinsRequestManager());
+        setRetainInstance(true);
     }
 
     @Nullable
@@ -74,6 +77,7 @@ public class BuildListFragment extends BaseFragment {
         buildListView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
+                Timber.d("Page: "+page +"  totalItems: "+ totalItemsCount);
                 //TODO
 //                viewModel.loadBuilds(totalItemsCount);
             }
