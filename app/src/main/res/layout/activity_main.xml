@@ -11,8 +11,8 @@
 
     <!-- TODO toolbar -->
 
-    <fragment android:name="me.algar.cosmos.ui.BuildListFragment"
-        android:id="@+id/build_list"
+    <fragment android:name="me.algar.cosmos.ui.JobListFragment"
+        android:id="@+id/job_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

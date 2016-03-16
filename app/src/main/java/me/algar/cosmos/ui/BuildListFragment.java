@@ -36,7 +36,6 @@ public class BuildListFragment extends BaseFragment {
 
     private RecyclerView.Adapter adapter;
     private LinearLayoutManager layoutManager;
-    private Subscription buildSubscription;
 
     private BuildListViewModel viewModel;
     private List<Build> builds;
@@ -96,7 +95,7 @@ public class BuildListFragment extends BaseFragment {
 
     @Override
     protected void subscribe() {
-        buildSubscription = viewModel.getBuildDataSubject()
+        subscription = viewModel.getBuildDataSubject()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new BuildSubscriber());
     }
