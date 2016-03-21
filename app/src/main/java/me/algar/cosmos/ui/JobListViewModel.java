@@ -1,5 +1,6 @@
 package me.algar.cosmos.ui;
 
+import android.database.Observable;
 import android.support.annotation.NonNull;
 
 import com.jakewharton.rxrelay.ReplayRelay;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.algar.cosmos.api.JenkinsRequestManager;
+import me.algar.cosmos.api.models.Job;
 import me.algar.cosmos.data.Jobvm;
 import rx.Subscription;
 

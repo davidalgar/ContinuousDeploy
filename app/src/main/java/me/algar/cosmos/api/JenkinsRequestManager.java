@@ -9,6 +9,7 @@ import me.algar.cosmos.api.models.Job;
 import me.algar.cosmos.data.JobStorage;
 import me.algar.cosmos.data.Jobvm;
 import rx.Observable;
+import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 public class JenkinsRequestManager {
@@ -30,8 +31,21 @@ public class JenkinsRequestManager {
         // then subscribe to the Service observable to update the DB when api response is received
         new JenkinsService().getJobs(startIndex)
                 .subscribeOn(Schedulers.io())
-                .subscribe(jobs -> {
-                    db.insertJobs(jobs);
+                .subscribe(new Subscriber<List<Job>>() {
+                    @Override
+                    public void onCompleted() {
+                        // Do nothing?
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(List<Job> jobs) {
+                        db.insertJobs(jobs);
+                    }
                 });
 
         return observable;
