@@ -36,15 +36,12 @@ public class BuildListFragment extends BaseFragment {
 
     private RecyclerView.Adapter adapter;
     private LinearLayoutManager layoutManager;
-
     private BuildListViewModel viewModel;
-    private List<Build> builds;
-    private int startIndex = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.viewModel = new BuildListViewModel(new JenkinsRequestManager());
+        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()));
         setRetainInstance(true);
     }
 
@@ -53,8 +50,6 @@ public class BuildListFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_build_list, container, false);
         ButterKnife.bind(this, rootView);
-
-        this.builds = JenkinsModel.createMockBuilds();
 
         setupRecyclerView();
 
@@ -69,7 +64,7 @@ public class BuildListFragment extends BaseFragment {
         layoutManager = new LinearLayoutManager(getContext());
         buildListView.setLayoutManager(layoutManager);
 
-        adapter = new BuildListAdapter(builds, getContext());
+        adapter = new BuildListAdapter(viewModel.getBuilds());
         buildListView.setAdapter(adapter);
         buildListView.setItemAnimator(new SlideInUpAnimator());
 
@@ -77,8 +72,7 @@ public class BuildListFragment extends BaseFragment {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Timber.d("Page: "+page +"  totalItems: "+ totalItemsCount);
-                //TODO
-//                viewModel.loadBuilds(totalItemsCount);
+                viewModel.loadBuilds();
             }
         });
     }
@@ -87,8 +81,8 @@ public class BuildListFragment extends BaseFragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                startIndex = 0;
-                viewModel.loadBuilds(startIndex);
+                viewModel.refreshing();
+                viewModel.loadBuilds();
             }
         });
     }
@@ -120,9 +114,9 @@ public class BuildListFragment extends BaseFragment {
 
         @Override
         public void onNext(Job userDataResponse) {
-            builds.addAll(userDataResponse.builds);
-            adapter.notifyItemRangeInserted(startIndex, userDataResponse.builds.size());
-            startIndex += userDataResponse.builds.size();
+            int rangeStart = viewModel.getLastBuildPosition();
+            viewModel.addBuilds(userDataResponse.builds);
+            adapter.notifyItemRangeInserted(rangeStart, viewModel.getLastBuildPosition());
 
             showMessage(getContext().getString(R.string.load_complete));
         }

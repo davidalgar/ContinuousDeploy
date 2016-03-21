@@ -1,23 +1,20 @@
 package me.algar.cosmos.api;
 
-import java.util.List;
-
 import me.algar.cosmos.api.models.Build;
 import me.algar.cosmos.api.models.Job;
+import me.algar.cosmos.api.models.JobCollection;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
 
-/**
- * Created by David on 3/10/16.
- */
 public interface JenkinsApi {
-    String JENKINS = "http://10.0.2.2:8080/";
-//    String JENKINS = "http://jsonplaceholder.typicode.com";
+    //TODO pick up from sharedPref, allow user to change it
+//    String JENKINS = "http://10.0.2.2:8080/";
+    String JENKINS = "https://builds.apache.org/";
 
-    @GET("api/json?tree=jobs[name,color]")
-    Observable<List<Job>> getJobs();
+    @GET("api/json")
+    Observable<JobCollection> getJobs(@Query("tree") String treeParameter);
 
     @GET("job/{job}/api/json") //{{start},{end}}
 //    @GET("posts")

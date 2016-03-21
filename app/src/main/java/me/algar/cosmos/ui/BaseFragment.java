@@ -4,6 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.design.widget.Snackbar;
 
 import rx.Subscription;
+import timber.log.Timber;
 
 abstract class BaseFragment extends Fragment {
     protected Subscription subscription;
@@ -20,6 +21,7 @@ abstract class BaseFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
         if(subscription != null){
             subscription.unsubscribe();
         }

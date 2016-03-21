@@ -17,15 +17,33 @@ import me.algar.cosmos.R;
 
 /**
  * Created by david.algar on 3/14/16.
+ *
  */
-public class RecyclerViewFragment extends Fragment {
+public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
+        extends BaseFragment
+        implements SwipeRefreshLayout.OnRefreshListener {
     @Bind(R.id.list)
     protected RecyclerView recyclerView;
     @Bind(R.id.swipe_refresh_container)
     protected SwipeRefreshLayout swipeRefreshLayout;
 
     protected LinearLayoutManager layoutManager;
-    private RecyclerView.Adapter adapter;
+    protected RecyclerView.Adapter<T> adapter;
+
+
+    protected RecyclerView.Adapter<T> createAdapter(){
+        throw new UnsupportedOperationException("You must override createAdapter()");
+    }
+
+    @Override
+    void subscribe() {
+        throw new UnsupportedOperationException("You must override subscribe()");
+    }
+
+    @Override
+    public void onRefresh() {
+        throw new UnsupportedOperationException("You must override onRefresh()");
+    }
 
     @Nullable
     @Override
@@ -38,21 +56,25 @@ public class RecyclerViewFragment extends Fragment {
         return rootView;
     }
 
+    protected void stopRefreshing(){
+        swipeRefreshLayout.setRefreshing(false);
+    }
+
+    protected void startRefreshing(){
+        swipeRefreshLayout.setRefreshing(true);
+    }
+
     protected void setupRecyclerView(){
         //choose some defaults
         recyclerView.setItemAnimator(new SlideInUpAnimator());
         recyclerView.setHasFixedSize(true);
-
 
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
         adapter = createAdapter();
         recyclerView.setAdapter(adapter);
-    }
 
-    //TODO override
-    protected RecyclerView.Adapter createAdapter(){
-        return null;
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 }

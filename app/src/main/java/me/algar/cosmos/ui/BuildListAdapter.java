@@ -1,6 +1,5 @@
 package me.algar.cosmos.ui;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import me.algar.cosmos.R;
 import me.algar.cosmos.api.models.Build;
 
 public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.ViewHolder> {
-    private final Context context;
     private List<Build> buildList;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -36,9 +34,8 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         }
     }
 
-    public BuildListAdapter(List<Build> buildList, Context context) {
+    public BuildListAdapter(List<Build> buildList) {
         this.buildList = buildList;
-        this.context = context;
     }
 
     @Override
@@ -58,9 +55,9 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         holder.responsibleName.setText(item.getResponsible());
 
         if(item.status == Build.STATUS_SUCCESS){
-            holder.status.setText(context.getString(R.string.success));
+            holder.status.setText(holder.itemView.getContext().getString(R.string.success));
         }else {
-            holder.status.setText(context.getString(R.string.failure));
+            holder.status.setText(holder.itemView.getContext().getString(R.string.failure));
         }
     }
 

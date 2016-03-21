@@ -2,25 +2,27 @@ package me.algar.cosmos.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
 
+import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.api.models.Job;
+import me.algar.cosmos.data.Jobvm;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import timber.log.Timber;
 
-public class JobListFragment extends RecyclerViewFragment {
-    private List<Job> jobs;
-    private int startIndex = 0;
+public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHolder> {
     private JobListViewModel viewModel;
 
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.viewModel = new JobListViewModel(new JenkinsRequestManager());
+        this.viewModel = new JobListViewModel(new JenkinsRequestManager(getContext()));
     }
 
     @Nullable
@@ -28,26 +30,60 @@ public class JobListFragment extends RecyclerViewFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
-        setupRefresh();
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                viewModel.loadJobs();
+            }
+        });
 
         return rootView;
     }
 
-    private void setupRefresh(){
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                startIndex = 0;
-                viewModel.loadJobs(startIndex);
-            }
-        });
+    @Override
+    public void onRefresh() {
+        viewModel.refresh();
+        adapter.notifyDataSetChanged();
+    }
 
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                //TODO
-//                viewModel.loadBuilds(totalItemsCount);
-            }
-        });
+    @Override
+    protected void subscribe() {
+        subscription = viewModel.getJobDataSubject()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new JobSubscriber());
+    }
+
+    @Override
+    protected RecyclerView.Adapter<JobListAdapter.ViewHolder> createAdapter() {
+        return new JobListAdapter(viewModel.getJobs());
+    }
+
+
+    public class JobSubscriber extends Subscriber<List<Jobvm>> {
+        @Override
+        public void onCompleted() {
+            stopRefreshing();
+            Timber.d("onCompleted()");
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            stopRefreshing();
+            Timber.d("onError()");
+
+            e.printStackTrace();
+
+            showMessage("Error");
+        }
+
+        @Override
+        public void onNext(List<Jobvm> userDataResponse) {
+            stopRefreshing();
+            Timber.d("got " + userDataResponse.size());
+            int rangeStart = viewModel.getLastJobPosition();
+            viewModel.addJobs(userDataResponse);
+            adapter.notifyItemRangeInserted(rangeStart, viewModel.getLastJobPosition());
+            showMessage(getContext().getString(R.string.load_complete));
+        }
     }
 }
