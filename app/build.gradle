@@ -12,6 +12,12 @@ android {
         disable 'InvalidPackage'
     }
 
+    sourceSets {
+        defaultConfig {
+            testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        }
+    }
+
     defaultConfig {
         applicationId "me.algar.cosmos"
         minSdkVersion 19
@@ -36,12 +42,17 @@ retrolambda {
     jdk '/Library/Java/JavaVirtualMachines/jdk1.8.0_73.jdk/Contents/Home'
 }
 
+final RUNNER_VERSION = '0.4'
+final ESPRESSO_VERSION = '2.2.1'
+final SUPPORT_LIB_VERSION = '23.1.1'
+
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
-    compile 'com.android.support:cardview-v7:23.2.0'
-    compile 'com.android.support:recyclerview-v7:23.2.0'
+    compile "com.android.support:appcompat-v7:${SUPPORT_LIB_VERSION}"
+    compile "com.android.support:design:${SUPPORT_LIB_VERSION}"
+    compile "com.android.support:cardview-v7:${SUPPORT_LIB_VERSION}"
+    compile "com.android.support:recyclerview-v7:${SUPPORT_LIB_VERSION}"
     compile 'jp.wasabeef:recyclerview-animators:2.2.0'
     // Networking
     compile 'com.squareup.retrofit2:retrofit:2.0.0-beta4'
@@ -62,6 +73,21 @@ dependencies {
     compile 'com.jakewharton.timber:timber:4.1.1'
     //Testing
     testCompile 'junit:junit:4.12'
+
+    // UI Testing
+    androidTestCompile ("com.android.support.test:runner:${RUNNER_VERSION}"){
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile ("com.android.support.test:rules:${RUNNER_VERSION}"){
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile ("com.android.support.test.espresso:espresso-core:${ESPRESSO_VERSION}"){
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile ("com.android.support.test.espresso:espresso-intents:${ESPRESSO_VERSION}"){
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile ("org.mockito:mockito-core:1.10.19")
     compile 'com.facebook.stetho:stetho:1.3.1'
     compile 'com.facebook.stetho:stetho-okhttp3:1.3.1'
 }
