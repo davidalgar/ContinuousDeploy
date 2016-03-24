@@ -7,16 +7,16 @@ Android app that makes it easy to install the latest APK from your CI server
 
 # Technologies Used
 ### Networking
-* Retrofit2 - network library, provides Observable network calls
+* [Retrofit2](https://github.com/square/retrofit) - network library, provides Observable network calls
 
 ### Architecture
-* RxJava / RxAndroid - reactive extensions for Android
-* RxRelay - like Subjects, but they do not terminate on onError/onComplete
+* [RxJava](https://github.com/ReactiveX/RxJava) / [RxAndroid](https://github.com/ReactiveX/RxAndroid) - Reactive extensions for Android
+* [RxRelay](https://github.com/JakeWharton/RxRelay) - like Subjects, but they do not terminate on onError/onComplete
 
 ### Data Storage
-* SqlBrite - provides Observable SQL queries, making it easier to keep the view updated with the data model
-* SqlDelight - auto-generation of model classes for SQLite from plain SQL
+* [SQLBrite](https://github.com/square/sqlbrite) - provides Observable SQL queries, making it easier to keep the view updated with the data model
+* [SQLDelight](https://github.com/square/sqldelight) - auto-generation of model classes for SQLite from plain SQL
 
 ### Utilities
-* Butterknife - view binding
-* Timber - logging wrapper
+* [Butterknife](http://jakewharton.github.io/butterknife/) - view binding
+* [Timber](https://github.com/JakeWharton/timber) - logging wrapper
