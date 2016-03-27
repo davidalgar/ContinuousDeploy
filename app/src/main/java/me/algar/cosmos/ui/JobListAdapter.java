@@ -12,14 +12,14 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.algar.cosmos.R;
-import me.algar.cosmos.data.Jobvm;
+import me.algar.cosmos.data.Job;
 import timber.log.Timber;
 
 /**
  * Created by david.algar on 3/16/16.
  */
 public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHolder> {
-    private final List<Jobvm> jobList;
+    private final List<Job> jobList;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.job_name)
@@ -33,14 +33,14 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
         }
     }
 
-    public JobListAdapter(@NonNull  List<Jobvm> buildList) {
+    public JobListAdapter(@NonNull  List<Job> buildList) {
         this.jobList = buildList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
-        Timber.d("Creating ");
+        Timber.d("onCreateViewHolder()");
         View listItemRoot = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_job, parent, false);
 
@@ -49,7 +49,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Jobvm item = jobList.get(position);
+        Job item = jobList.get(position);
 
         if(item == null){return;}
 

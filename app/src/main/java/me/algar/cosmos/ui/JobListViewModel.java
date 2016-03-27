@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.data.Jobvm;
+import me.algar.cosmos.data.Job;
 import rx.Subscription;
 
 public class JobListViewModel {
     private final JenkinsRequestManager requestManager;
-    private List<Jobvm> jobs = new ArrayList<>();
+    private List<Job> jobs = new ArrayList<>();
 
     private Subscription subscription;
-    private ReplayRelay<List<Jobvm>> jobDataSubject;
+    private ReplayRelay<List<Job>> jobDataSubject;
 
     public JobListViewModel(@NonNull JenkinsRequestManager manager) {
         this.requestManager = manager;
@@ -25,7 +25,7 @@ public class JobListViewModel {
         loadJobs();
     }
 
-    public ReplayRelay<List<Jobvm>> getJobDataSubject() {
+    public ReplayRelay<List<Job>> getJobDataSubject() {
         return jobDataSubject;
     }
 
@@ -38,7 +38,7 @@ public class JobListViewModel {
                 .subscribe(jobDataSubject);
     }
 
-    public List<Jobvm> getJobs() {
+    public List<Job> getJobs() {
         return jobs;
     }
 
@@ -48,7 +48,7 @@ public class JobListViewModel {
         loadJobs();
     }
 
-    public void addJobs(List<Jobvm> userDataResponse) {
+    public void addJobs(List<Job> userDataResponse) {
         jobs.addAll(userDataResponse);
     }
 

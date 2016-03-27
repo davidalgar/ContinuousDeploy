@@ -3,11 +3,10 @@ package me.algar.cosmos.api;
 import java.util.List;
 
 import me.algar.cosmos.api.models.Build;
-import me.algar.cosmos.api.models.Job;
 import me.algar.cosmos.api.models.JobCollection;
+import me.algar.cosmos.data.Job;
 import retrofit2.Retrofit;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class JenkinsService {

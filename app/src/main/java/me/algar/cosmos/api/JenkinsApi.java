@@ -1,8 +1,8 @@
 package me.algar.cosmos.api;
 
 import me.algar.cosmos.api.models.Build;
-import me.algar.cosmos.api.models.Job;
 import me.algar.cosmos.api.models.JobCollection;
+import me.algar.cosmos.data.Job;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

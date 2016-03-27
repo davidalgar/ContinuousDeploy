@@ -11,7 +11,7 @@ import java.util.List;
 
 import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.data.Jobvm;
+import me.algar.cosmos.data.Job;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
@@ -58,8 +58,7 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
         return new JobListAdapter(viewModel.getJobs());
     }
 
-
-    public class JobSubscriber extends Subscriber<List<Jobvm>> {
+    public class JobSubscriber extends Subscriber<List<Job>> {
         @Override
         public void onCompleted() {
             stopRefreshing();
@@ -77,7 +76,7 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
         }
 
         @Override
-        public void onNext(List<Jobvm> userDataResponse) {
+        public void onNext(List<Job> userDataResponse) {
             stopRefreshing();
             Timber.d("got " + userDataResponse.size());
             int rangeStart = viewModel.getLastJobPosition();

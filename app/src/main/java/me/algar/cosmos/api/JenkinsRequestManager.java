@@ -5,9 +5,8 @@ import android.content.Context;
 
 import java.util.List;
 
-import me.algar.cosmos.api.models.Job;
 import me.algar.cosmos.data.JobStorage;
-import me.algar.cosmos.data.Jobvm;
+import me.algar.cosmos.data.Job;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
@@ -24,9 +23,9 @@ public class JenkinsRequestManager {
         return new JenkinsService().getJob(jobName, startIndex);
     }
 
-    public Observable<List<Jobvm>> getJobs(int startIndex) {
+    public Observable<List<Job>> getJobs(int startIndex) {
         // return database observable
-        Observable<List<Jobvm>> observable = db.getJobs(startIndex, startIndex + ITEMS_PER_REQUEST);
+        Observable<List<Job>> observable = db.getJobs(startIndex, startIndex + ITEMS_PER_REQUEST);
 
         // then subscribe to the Service observable to update the DB when api response is received
         new JenkinsService().getJobs(startIndex)

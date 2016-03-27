@@ -9,9 +9,7 @@ import com.squareup.sqlbrite.SqlBrite;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
-import me.algar.cosmos.api.models.Job;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
@@ -26,7 +24,7 @@ public class JobStorage {
         db = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
     }
 
-    public Observable<List<Jobvm>> getJobs(int startIndex, int endIndex) {
+    public Observable<List<Job>> getJobs(int startIndex, int endIndex) {
         Observable<SqlBrite.Query> jobs
                 = db.createQuery(JobDatabaseHelper.TABLE_NAME,
                 JobModel.SELECT_RANGE,
@@ -34,12 +32,12 @@ public class JobStorage {
 
         return jobs.map((SqlBrite.Query query) -> {
             Cursor cursor = query.run();
-            List<Jobvm> jobList = new ArrayList<>();
+            List<Job> jobList = new ArrayList<>();
             if (cursor == null) {
                 return jobList;
             }
             while (cursor.moveToNext()) {
-                jobList.add(Jobvm.MAPPER.map(cursor));
+                jobList.add(Job.MAPPER.map(cursor));
             }
             return jobList;
         }).subscribeOn(Schedulers.computation());
@@ -49,7 +47,7 @@ public class JobStorage {
         boolean success;
         try (BriteDatabase.Transaction transaction = db.newTransaction()) {
             for (Job job : jobs) {
-                db.insert(JobModel.TABLE_NAME, new Jobvm.Marshal()
+                db.insert(JobModel.TABLE_NAME, new Job.Marshal()
                         .color(job.color)
                         .name(job.name)
                         .asContentValues());

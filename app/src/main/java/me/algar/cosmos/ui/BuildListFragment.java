@@ -5,25 +5,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.algar.cosmos.R;
-import me.algar.cosmos.api.JenkinsModel;
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.api.models.Build;
-import me.algar.cosmos.api.models.Job;
+import me.algar.cosmos.data.Job;
 import rx.Subscriber;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class BuildListFragment extends BaseFragment {

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.data.Jobvm;
+import me.algar.cosmos.data.Job;
 import me.algar.cosmos.ui.JobListViewModel;
 import rx.Observable;
 
@@ -23,28 +23,27 @@ import static org.mockito.Mockito.verify;
 public class JobListViewModelTests {
 
     protected JenkinsRequestManager mockRequestManager;
-    List<Jobvm> mockJobsList;
+    List<Job> mockJobsList;
 
     @Before
     public void makeMockRequestManager() {
         mockRequestManager = Mockito.mock(JenkinsRequestManager.class);
         mockJobsList = new ArrayList<>();
-        Jobvm item = Mockito.mock(Jobvm.class);
+        Job item = Mockito.mock(Job.class);
         mockJobsList.add(item);
         mockJobsList.add(item);
         Mockito.doReturn(Observable.just(mockJobsList))
                 .when(mockRequestManager).getJobs(0);
     }
 
-    /*
-        Job View Model
-        - upon creation, get a base list of jobs
-        -
-
-     */
+    @Test
+    public void testViewModelShouldGetDataOnCreation(){
+        JobListViewModel vm = new JobListViewModel(mockRequestManager);
+        verify(mockRequestManager).getJobs(0);
+    }
 
     @Test
-    public void testJobsAreAdded() {
+    public void testJobsShouldBeAdded() {
         JobListViewModel vm = new JobListViewModel(mockRequestManager);
         int initialSize = vm.getJobs().size();
 
@@ -54,10 +53,10 @@ public class JobListViewModelTests {
     }
 
     @Test
-    public void testCacheIsClearedAfterRefresh() {
+    public void testShouldClearCacheAfterRefresh() {
         JobListViewModel vm = new JobListViewModel(mockRequestManager);
 
-        verify(mockRequestManager).getJobs(0);  // should request initial jobs after construction
+        verify(mockRequestManager).getJobs(0);  // first request initial jobs after construction
 
         vm.refresh();
 

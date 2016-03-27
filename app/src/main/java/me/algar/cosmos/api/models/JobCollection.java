@@ -1,7 +1,8 @@
 package me.algar.cosmos.api.models;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import me.algar.cosmos.data.Job;
 
 /**
  * Created by david.algar on 3/17/16.
