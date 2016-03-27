@@ -6,6 +6,8 @@ import java.util.List;
 import me.algar.cosmos.api.models.Build;
 
 public class Job implements JobModel {
+    public static final String FAILURE_COLOR = "red";
+    public static final String SUCCESS_COLOR = "blue";
     public String name;
     public String color;
     public List<Build> builds = new ArrayList<>();

@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -26,6 +27,12 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
         public TextView jobName;
         @Bind(R.id.job_status)
         public TextView status;
+        @Bind(R.id.status_circle)
+        public RelativeLayout statusCircle;
+        @Bind(R.id.status_circle_error_icon)
+        public View statusErrorIcon;
+        @Bind(R.id.status_circle_checkmark)
+        public View statusCheckmarkIcon;
 
         public ViewHolder(View root) {
             super(root);
@@ -55,6 +62,17 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
 
         holder.jobName.setText(item.name());
         holder.status.setText(item.color());
+        if(item.color().equals(Job.FAILURE_COLOR)){
+            holder.statusErrorIcon.setVisibility(View.VISIBLE);
+            holder.statusCheckmarkIcon.setVisibility(View.GONE);
+            holder.statusCircle.setBackground(
+                    holder.itemView.getContext().getResources().getDrawable(R.drawable.red_circle));
+        } else{
+            holder.statusErrorIcon.setVisibility(View.GONE);
+            holder.statusCheckmarkIcon.setVisibility(View.VISIBLE);
+            holder.statusCircle.setBackground(
+                    holder.itemView.getContext().getResources().getDrawable(R.drawable.green_circle));
+        }
     }
 
     @Override

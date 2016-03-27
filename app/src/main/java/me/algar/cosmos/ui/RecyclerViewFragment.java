@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import jp.wasabeef.recyclerview.animators.FadeInAnimator;
+import jp.wasabeef.recyclerview.animators.SlideInRightAnimator;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.algar.cosmos.R;
 
@@ -53,6 +55,15 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
 
         setupRecyclerView();
 
+        swipeRefreshLayout.setColorSchemeColors(
+                R.color.red,
+                R.color.orange,
+                R.color.yellow,
+                R.color.green,
+                R.color.blue,
+                R.color.indigo,
+                R.color.violet);
+
         return rootView;
     }
 
@@ -66,7 +77,7 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
 
     protected void setupRecyclerView(){
         //choose some defaults
-        recyclerView.setItemAnimator(new SlideInUpAnimator());
+        recyclerView.setItemAnimator(new SlideInRightAnimator());
         recyclerView.setHasFixedSize(true);
 
         layoutManager = new LinearLayoutManager(getContext());
