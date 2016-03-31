@@ -38,11 +38,6 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
     }
 
     @Override
-    void subscribe() {
-        throw new UnsupportedOperationException("You must override subscribe()");
-    }
-
-    @Override
     public void onRefresh() {
         throw new UnsupportedOperationException("You must override onRefresh()");
     }
@@ -67,11 +62,11 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
         return rootView;
     }
 
-    protected void stopRefreshing(){
+    public void stopRefreshing(){
         swipeRefreshLayout.setRefreshing(false);
     }
 
-    protected void startRefreshing(){
+    public void startRefreshing(){
         swipeRefreshLayout.setRefreshing(true);
     }
 

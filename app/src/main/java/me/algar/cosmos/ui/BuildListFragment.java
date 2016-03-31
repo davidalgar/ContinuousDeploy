@@ -3,23 +3,33 @@ package me.algar.cosmos.ui;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.List;
 
-import icepick.Icepick;
-import icepick.State;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.api.models.Build;
+import me.algar.cosmos.data.Job;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
 
-public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.ViewHolder> {
+public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.ViewHolder>
+        implements BuildListViewModel.IBuildListView {
     private static final String ARG_JOB_ID = "job_id";
+    //region Views
+    @Bind(R.id.build_list)
+    RecyclerView buildListView;
+    @Bind(R.id.swipe_refresh_container)
+    SwipeRefreshLayout swipeRefreshLayout;
+    //endregion
+
     private BuildListViewModel viewModel;
     @Nullable
     Long jobId;
@@ -36,11 +46,17 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()), this);
+        setRetainInstance(true);
         Bundle b = getArguments();
         jobId = b.getLong(ARG_JOB_ID);
-        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()));
         viewModel.setJob(jobId);
 //        setRetainInstance(true);
+    }
+
+    @Override
+    public void onDestroyView(){
+        viewModel.destroy();
     }
 
     @Nullable
@@ -48,8 +64,7 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
-        setupRefresh();
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Timber.d("Page: " + page + "  totalItems: " + totalItemsCount);
@@ -60,62 +75,18 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
         return rootView;
     }
 
-    @Override public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    private void setupRefresh() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            viewModel.refreshing();
-            viewModel.loadBuilds();
-        });
+    protected BuildListAdapter createAdapter(){
+        return new BuildListAdapter(viewModel.getBuilds());
     }
 
     @Override
     public void onRefresh() {
         viewModel.refreshing();
-        viewModel.loadBuilds();
     }
 
+    /*** ViewModel hooks (start/stop refreshing are inherited from parent) */
     @Override
-    protected void subscribe() {
-        subscription = viewModel.loadBuilds()
-                .subscribe(new BuildSubscriber());
-    }
-
-    @Override
-    protected RecyclerView.Adapter<BuildListAdapter.ViewHolder> createAdapter() {
-        return new BuildListAdapter(viewModel.getBuilds());
-    }
-
-    private class BuildSubscriber extends Subscriber<List<Build>> {
-
-        @Override
-        public void onCompleted() {
-            stopRefreshing();
-
-            Timber.d("onCompleted()");
-        }
-
-        @Override
-        public void onError(Throwable e) {
-            stopRefreshing();
-
-            Timber.d("onError()");
-            e.printStackTrace();
-
-            showMessage("Error");
-        }
-
-        @Override
-        public void onNext(List<Build> userDataResponse) {
-            stopRefreshing();
-            Timber.d("got " + userDataResponse.size() + " builds");
-            int rangeStart = adapter.getItemCount();
-            viewModel.addBuilds(userDataResponse);
-            adapter.notifyItemRangeInserted(rangeStart, viewModel.getLastBuildPosition());
-
-            showMessage(getContext().getString(R.string.load_complete));
-        }
+    public void showBuilds(int rangeStart, int rangeEnd) {
+        adapter.notifyItemRangeInserted(rangeStart, rangeEnd);
     }
 }

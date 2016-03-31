@@ -30,7 +30,9 @@ abstract class BaseFragment extends Fragment {
         subscribe();
     }
 
-    abstract void subscribe();
+    protected void subscribe(){
+        // do nothing
+    }
 
     @Override
     public void onPause() {
