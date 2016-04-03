@@ -13,6 +13,7 @@ import rx.schedulers.Schedulers;
 
 public class BuildListViewModel {
     private IBuildListView view;
+    private String jobName = "Continuous Deploy - Development";
 
     public interface IBuildListView {
         // triggered when there are new builds to show
@@ -32,7 +33,7 @@ public class BuildListViewModel {
     }
     public Observable<List<Build>> loadBuilds() {
         return requestManager
-                .getJob("Cosmos - Development", builds.size())
+                .getJob(jobName, builds.size())
                 .map(Job::getBuilds)
                 .map(builds -> {
                     List<Build> newList = new ArrayList<>();

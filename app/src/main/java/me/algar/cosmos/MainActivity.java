@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity
     public void onJobSelected(long jobId) {
         if(detailFragment == null){
             detailFragment = BuildListFragment.create(jobId);
+        }else{
+            detailFragment.setJob(jobId);
         }
 
         getSupportFragmentManager().beginTransaction()

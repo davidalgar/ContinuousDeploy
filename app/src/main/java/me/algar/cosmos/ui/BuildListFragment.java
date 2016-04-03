@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import icepick.Icepick;
+import icepick.State;
 import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
@@ -23,17 +25,13 @@ import timber.log.Timber;
 public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.ViewHolder>
         implements BuildListViewModel.IBuildListView {
     private static final String ARG_JOB_ID = "job_id";
-    //region Views
-    @Bind(R.id.build_list)
-    RecyclerView buildListView;
-    @Bind(R.id.swipe_refresh_container)
-    SwipeRefreshLayout swipeRefreshLayout;
-    //endregion
 
     private BuildListViewModel viewModel;
     @Nullable
     Long jobId;
 
+    @State
+    Long autoJobId;
 
     public static BuildListFragment create(long jobId) {
         Bundle args = new Bundle();
@@ -46,12 +44,17 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()), this);
         setRetainInstance(true);
         Bundle b = getArguments();
         jobId = b.getLong(ARG_JOB_ID);
-        viewModel.setJob(jobId);
 //        setRetainInstance(true);
+        Icepick.restoreInstanceState(this, savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this, outState);
     }
 
     @Override
@@ -63,6 +66,8 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
+        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()), this);
+        viewModel.setJob(jobId);
 
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
             @Override
@@ -88,5 +93,10 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     @Override
     public void showBuilds(int rangeStart, int rangeEnd) {
         adapter.notifyItemRangeInserted(rangeStart, rangeEnd);
+    }
+
+    public void setJob(Long job) {
+        this.jobId = job;
+        //TODO reset data
     }
 }

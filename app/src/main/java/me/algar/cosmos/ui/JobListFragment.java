@@ -43,15 +43,13 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
             }
         });
 
-        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Job item = ((JobListAdapter)adapter).getItem(position);
-                if(item==null){
-                    return;
-                }
-                switchToJobDetail(item._id());
+        ItemClickSupport.addTo(recyclerView).setOnItemClickListener((recyclerView1, position, v) -> {
+            Timber.d("Clicked Item!" + position);
+            Job item = ((JobListAdapter)adapter).getItem(position);
+            if(item==null){
+                return;
             }
+            switchToJobDetail(item._id());
         });
 
         return rootView;

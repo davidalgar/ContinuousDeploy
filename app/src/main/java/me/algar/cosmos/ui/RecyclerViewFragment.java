@@ -62,6 +62,14 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
         return rootView;
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        adapter = createAdapter();        recyclerView.setAdapter(adapter);
+
+
+    }
+
     public void stopRefreshing(){
         swipeRefreshLayout.setRefreshing(false);
     }
@@ -77,9 +85,6 @@ public class RecyclerViewFragment<T extends RecyclerView.ViewHolder>
 
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-
-        adapter = createAdapter();
-        recyclerView.setAdapter(adapter);
 
         swipeRefreshLayout.setOnRefreshListener(this);
     }
