@@ -1,13 +1,27 @@
 package me.algar.cosmos.ui;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.design.widget.Snackbar;
 
+import icepick.Icepick;
 import rx.Subscription;
-import timber.log.Timber;
 
 abstract class BaseFragment extends Fragment {
     protected Subscription subscription;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Icepick.restoreInstanceState(this, savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this, outState);
+    }
 
     @Override
     public void onResume() {

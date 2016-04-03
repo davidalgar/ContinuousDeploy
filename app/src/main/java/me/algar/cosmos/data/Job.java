@@ -20,6 +20,10 @@ public class Job implements JobModel {
         }
     });
 
+    public List<Build> getBuilds() {
+        return builds;
+    }
+
     public static final class Marshal extends JobMarshal<Marshal> {
         public Marshal() {
             super();

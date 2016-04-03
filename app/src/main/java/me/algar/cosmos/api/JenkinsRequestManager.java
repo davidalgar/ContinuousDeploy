@@ -12,8 +12,16 @@ import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 public class JenkinsRequestManager {
+    private static JenkinsRequestManager sInstance;
     private JobStorage db;
     static final int ITEMS_PER_REQUEST = 30;
+
+    public static JenkinsRequestManager getInstance(Context context){
+        if(sInstance == null){
+            sInstance = new JenkinsRequestManager(context);
+        }
+        return sInstance;
+    }
 
     public JenkinsRequestManager(Context context) {
         db = new JobStorage(context.getApplicationContext());
@@ -21,6 +29,10 @@ public class JenkinsRequestManager {
 
     public Observable<Job> getJob(String jobName, int startIndex) {
         return new JenkinsService().getJob(jobName, startIndex);
+    }
+
+    public Observable<Job> getJobById(Long jobId){
+        return db.getJob(jobId);
     }
 
     public Observable<List<Job>> getJobs(int startIndex) {

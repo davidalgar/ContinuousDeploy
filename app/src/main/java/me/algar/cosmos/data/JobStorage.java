@@ -81,4 +81,24 @@ public class JobStorage {
                     }
                 });
     }
+
+    public Observable<Job> getJob(Long jobId) {
+        Observable<SqlBrite.Query> jobs
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME,
+                                JobModel.SELECT_BY_ID, jobId.toString());
+        return jobs.map((SqlBrite.Query query) -> {
+            Cursor cursor = query.run();
+            if (cursor == null) {
+                return null;
+            }
+            if (cursor.moveToNext()) {
+                return Job.MAPPER.map(cursor);
+            }
+            return null;
+        });
+    }
+
+    public class ItemNotFoundException extends Exception {
+
+    }
 }

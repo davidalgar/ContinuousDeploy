@@ -12,12 +12,18 @@ import java.util.List;
 import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
 import me.algar.cosmos.data.Job;
+import me.algar.cosmos.util.ItemClickSupport;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
 
 public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHolder> {
     private JobListViewModel viewModel;
+
+    //Implement this interface to be notified when a job is selected
+    public interface JobSelectedListener {
+        void onJobSelected(long jobId);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +43,24 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
             }
         });
 
+        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+            @Override
+            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                Job item = ((JobListAdapter)adapter).getItem(position);
+                if(item==null){
+                    return;
+                }
+                switchToJobDetail(item._id());
+            }
+        });
+
         return rootView;
+    }
+
+    private void switchToJobDetail(long id){
+        if(getActivity() instanceof JobSelectedListener){
+            ((JobSelectedListener)getActivity()).onJobSelected(id);
+        }
     }
 
     @Override
