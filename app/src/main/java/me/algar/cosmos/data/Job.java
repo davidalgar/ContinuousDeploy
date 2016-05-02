@@ -3,8 +3,6 @@ package me.algar.cosmos.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.algar.cosmos.api.models.Build;
-
 public class Job implements JobModel {
     public static final String FAILURE_COLOR = "red";
     public static final String SUCCESS_COLOR = "blue";

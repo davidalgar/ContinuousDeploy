@@ -3,8 +3,10 @@ package me.algar.cosmos.api;
 
 import android.content.Context;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import me.algar.cosmos.data.Build;
 import me.algar.cosmos.data.JobStorage;
 import me.algar.cosmos.data.Job;
 import rx.Observable;
@@ -31,13 +33,32 @@ public class JenkinsRequestManager {
         return new JenkinsService().getJob(jobName, startIndex);
     }
 
+    //Convenience unwrapper - this is the more useful form of data, since we don't care about the Job object
+    public Observable<List<Build>> getBuildsForJob(String jobName, int startIndex){
+        return new JenkinsService().getJob(jobName, startIndex)
+                .map(Job::getBuilds)
+                .map(builds -> {
+                    List<Build> newList = new ArrayList<>();
+                    for (Build build : builds) {
+                        if (build != null) {
+                            build.generateResponsible();
+                            newList.add(build);
+                        }
+                    }
+                    return newList;
+                });
+    }
+
     public Observable<Job> getJobById(Long jobId){
         return db.getJob(jobId);
     }
 
     public Observable<List<Job>> getJobs(int startIndex) {
         // return database observable
-        Observable<List<Job>> observable = db.getJobs(startIndex, startIndex + ITEMS_PER_REQUEST);
+        Observable<List<Job>> observable = db.getJobs(startIndex, startIndex + JenkinsService.JOBS_PER_REQUEST);
+
+        //TODO
+            // ideally if data exists, we would avoid the network call
 
         // then subscribe to the Service observable to update the DB when api response is received
         new JenkinsService().getJobs(startIndex)

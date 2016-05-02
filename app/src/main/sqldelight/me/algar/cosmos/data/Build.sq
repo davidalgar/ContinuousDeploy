@@ -1,0 +1,23 @@
+CREATE TABLE builds (
+  number LONG NOT NULL PRIMARY KEY,
+  status STRING NOT NULL,
+  url STRING NOT NULL,
+  responsible STRING
+);
+
+select_all:
+SELECT *
+FROM builds
+WHERE 1=1;
+
+select_range:
+SELECT *
+FROM builds
+WHERE 1=1
+LIMIT ?, ?;
+
+select_by_id:
+SELECT *
+FROM builds
+WHERE number=?
+LIMIT 1;

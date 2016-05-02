@@ -39,6 +39,7 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
+                Timber.d("Page: " + page + "  totalItems: " + totalItemsCount);
                 viewModel.loadJobs();
             }
         });

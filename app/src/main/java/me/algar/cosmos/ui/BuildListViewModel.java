@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.api.models.Build;
+import me.algar.cosmos.data.Build;
 import me.algar.cosmos.data.Job;
 import rx.Subscriber;
-import rx.subjects.AsyncSubject;
-import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class BuildListViewModel {
     private IBuildListView view;
-    private String jobName = "Continuous Deploy - Development";
+    private String jobName = "**FAILURE**";
 
     public interface IBuildListView {
         // triggered when there are new builds to show
@@ -31,19 +31,12 @@ public class BuildListViewModel {
 
         view.startRefreshing();
     }
-    public Observable<List<Build>> loadBuilds() {
-        return requestManager
-                .getJob(jobName, builds.size())
-                .map(Job::getBuilds)
-                .map(builds -> {
-                    List<Build> newList = new ArrayList<>();
-                    for (Build build : builds) {
-                        if (build != null) {
-                            newList.add(build);
-                        }
-                    }
-                    return newList;
-                });
+
+    public void loadBuilds() {
+         requestManager
+                .getBuildsForJob(jobName, builds.size())
+                 .observeOn(AndroidSchedulers.mainThread())
+                 .subscribe(new BuildSubscriber());
     }
 
     public List<Build> getBuilds() {
@@ -72,11 +65,13 @@ public class BuildListViewModel {
 
         @Override
         public void onCompleted() {
+            Timber.d("onCompleted()");
             view.stopRefreshing();
         }
 
         @Override
         public void onError(Throwable e) {
+            Timber.d("onError()");
             view.stopRefreshing();
 
             e.printStackTrace();
@@ -84,6 +79,7 @@ public class BuildListViewModel {
 
         @Override
         public void onNext(List<Build> builds) {
+            Timber.d("onNext()");
             view.stopRefreshing();
 
             int start = getBuilds().size();
@@ -101,6 +97,7 @@ public class BuildListViewModel {
                     if (job != null) {
                         this.jobName = job.name;
                     }
+                    loadBuilds();
                 });
     }
 }

@@ -9,7 +9,6 @@ SELECT *
 FROM jobs
 WHERE 1=1;
 
-
 select_range:
 SELECT *
 FROM jobs
@@ -20,4 +19,10 @@ select_by_id:
 SELECT *
 FROM jobs
 WHERE _id=?
+LIMIT 1;
+
+select_by_name:
+SELECT *
+FROM jobs
+WHERE name=?
 LIMIT 1;

@@ -11,7 +11,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.algar.cosmos.R;
-import me.algar.cosmos.api.models.Build;
+import me.algar.cosmos.data.Build;
 
 public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.ViewHolder> {
     private List<Build> buildList;
@@ -52,9 +52,9 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         Build item = buildList.get(position);
 
         holder.buildId.setText(item.getBuildNumber());
-        holder.responsibleName.setText(item.getResponsible());
+        holder.responsibleName.setText(item.responsible());
 
-        if(item.status == Build.STATUS_SUCCESS){
+        if(item.result != null && item.result.equals(Build.STATUS_SUCCESS)){
             holder.status.setText(holder.itemView.getContext().getString(R.string.success));
         }else {
             holder.status.setText(holder.itemView.getContext().getString(R.string.failure));

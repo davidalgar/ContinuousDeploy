@@ -24,9 +24,28 @@ public class JobStorage {
         db = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
     }
 
+    public Observable<List<Build>> getBuilds(int startIndex, int endIndex){
+        Observable<SqlBrite.Query> builds
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
+                JobModel.SELECT_RANGE,
+                "" + startIndex, "" + endIndex);
+
+        return builds.map((SqlBrite.Query query) -> {
+            Cursor cursor = query.run();
+            List<Build> buildList = new ArrayList<>();
+            if (cursor == null) {
+                return buildList;
+            }
+            while (cursor.moveToNext()) {
+                buildList.add(Build.MAPPER.map(cursor));
+            }
+            return buildList;
+        }).subscribeOn(Schedulers.computation());
+    }
+
     public Observable<List<Job>> getJobs(int startIndex, int endIndex) {
         Observable<SqlBrite.Query> jobs
-                = db.createQuery(JobDatabaseHelper.TABLE_NAME,
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
                 JobModel.SELECT_RANGE,
                 "" + startIndex, "" + endIndex);
 
@@ -47,10 +66,15 @@ public class JobStorage {
         boolean success;
         try (BriteDatabase.Transaction transaction = db.newTransaction()) {
             for (Job job : jobs) {
-                db.insert(JobModel.TABLE_NAME, new Job.Marshal()
-                        .color(job.color)
-                        .name(job.name)
-                        .asContentValues());
+                Cursor cursor = db.query(JobModel.SELECT_BY_NAME, job.name());
+
+                //only insert if it doesn't exist in the db
+                if(!cursor.moveToNext()) {
+                    db.insert(JobModel.TABLE_NAME, new Job.Marshal()
+                            .color(job.color)
+                            .name(job.name)
+                            .asContentValues());
+                }
             }
             transaction.markSuccessful();
             success = true;
@@ -84,7 +108,7 @@ public class JobStorage {
 
     public Observable<Job> getJob(Long jobId) {
         Observable<SqlBrite.Query> jobs
-                = db.createQuery(JobDatabaseHelper.TABLE_NAME,
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
                                 JobModel.SELECT_BY_ID, jobId.toString());
         return jobs.map((SqlBrite.Query query) -> {
             Cursor cursor = query.run();

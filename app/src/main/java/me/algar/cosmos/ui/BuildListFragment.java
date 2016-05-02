@@ -51,17 +51,6 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
         Icepick.restoreInstanceState(this, savedInstanceState);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Icepick.saveInstanceState(this, outState);
-    }
-
-    @Override
-    public void onDestroyView(){
-        viewModel.destroy();
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -69,10 +58,12 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
         this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()), this);
         viewModel.setJob(jobId);
 
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager){
+
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Timber.d("Page: " + page + "  totalItems: " + totalItemsCount);
+
                 viewModel.loadBuilds();
             }
         });
@@ -82,6 +73,18 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
 
     protected BuildListAdapter createAdapter(){
         return new BuildListAdapter(viewModel.getBuilds());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Icepick.saveInstanceState(this, outState);
+    }
+
+    @Override
+    public void onDestroyView(){
+        viewModel.destroy();
+        super.onDestroyView();
     }
 
     @Override
@@ -97,6 +100,6 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
 
     public void setJob(Long job) {
         this.jobId = job;
-        //TODO reset data
+        viewModel.setJob(job);
     }
 }

@@ -13,18 +13,21 @@
         <TextView
             android:id="@+id/build_id"
             tools:text="2945"
+            android:layout_marginRight="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/build_responsible_name"
             tools:text="David"
+            android:layout_marginRight="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/build_status"
             tools:text="@string/success"
+            android:layout_marginRight="20dp"
             android:textAllCaps="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
