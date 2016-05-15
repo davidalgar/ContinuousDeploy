@@ -65,7 +65,7 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
             public void onLoadMore(int page, int totalItemsCount) {
                 Timber.d("Page: " + page + "  totalItems: " + totalItemsCount);
 
-                viewModel.loadBuilds();
+                viewModel.loadBuilds(page);
             }
         });
 

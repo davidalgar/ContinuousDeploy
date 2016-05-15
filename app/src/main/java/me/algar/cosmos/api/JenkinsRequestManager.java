@@ -16,7 +16,6 @@ import rx.schedulers.Schedulers;
 public class JenkinsRequestManager {
     private static JenkinsRequestManager sInstance;
     private JobStorage db;
-    static final int ITEMS_PER_REQUEST = 30;
 
     public static JenkinsRequestManager getInstance(Context context){
         if(sInstance == null){

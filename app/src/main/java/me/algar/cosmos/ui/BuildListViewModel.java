@@ -5,7 +5,6 @@ import java.util.List;
 
 import me.algar.cosmos.api.JenkinsRequestManager;
 import me.algar.cosmos.data.Build;
-import me.algar.cosmos.data.Job;
 import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -32,7 +31,10 @@ public class BuildListViewModel {
         this.requestManager = manager;
     }
 
-    public void loadBuilds() {
+    public void loadBuilds(int page) {
+        if(builds.size() < page * 15){
+            return;
+        }
          this.subscription = requestManager
                 .getBuildsForJob(jobName, builds.size())
                  .observeOn(AndroidSchedulers.mainThread())
@@ -46,7 +48,7 @@ public class BuildListViewModel {
     public void refreshing() {
         builds.clear();
 
-        loadBuilds();
+        loadBuilds(0);
     }
 
     public void addBuilds(List<Build> builds) {
@@ -111,7 +113,7 @@ public class BuildListViewModel {
                     if (job != null) {
                         this.jobName = job.name;
                     }
-                    loadBuilds();
+                    loadBuilds(0);
                 });
     }
 }
