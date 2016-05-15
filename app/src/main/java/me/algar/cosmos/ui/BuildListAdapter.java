@@ -12,6 +12,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.algar.cosmos.R;
 import me.algar.cosmos.data.Build;
+import me.algar.cosmos.ui.views.StatusIcon;
 
 public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.ViewHolder> {
     private List<Build> buildList;
@@ -21,8 +22,8 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         public TextView buildId;
         @Bind(R.id.build_responsible_name)
         public TextView responsibleName;
-        @Bind(R.id.build_status)
-        public TextView status;
+        @Bind(R.id.build_status_icon)
+        public StatusIcon statusIcon;
 
         public ViewHolder(View root) {
             super(root);
@@ -55,9 +56,9 @@ public class BuildListAdapter extends RecyclerView.Adapter<BuildListAdapter.View
         holder.responsibleName.setText(item.responsible());
 
         if(item.result != null && item.result.equals(Build.STATUS_SUCCESS)){
-            holder.status.setText(holder.itemView.getContext().getString(R.string.success));
+            holder.statusIcon.setStatus(StatusIcon.STATUS_SUCCESS);
         }else {
-            holder.status.setText(holder.itemView.getContext().getString(R.string.failure));
+            holder.statusIcon.setStatus(StatusIcon.STATUS_FAILURE);
         }
     }
 

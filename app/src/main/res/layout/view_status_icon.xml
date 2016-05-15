@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <View
+        android:id="@+id/status_icon_success"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:background="@drawable/ic_check_black_24dp"
+        android:backgroundTint="@color/white"
+        />
+
+    <View
+        android:id="@+id/status_icon_failure"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:layout_gravity="center"
+        android:visibility="invisible"
+        android:background="@drawable/ic_close_black_24dp"
+        android:backgroundTint="@color/white"
+        />
+</merge>

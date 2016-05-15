@@ -7,6 +7,7 @@ import me.algar.cosmos.api.JenkinsRequestManager;
 import me.algar.cosmos.data.Build;
 import me.algar.cosmos.data.Job;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
@@ -14,6 +15,8 @@ import timber.log.Timber;
 public class BuildListViewModel {
     private IBuildListView view;
     private String jobName = "**FAILURE**";
+    private Subscription subscription;
+    private Subscription jobNameSubscription;
 
     public interface IBuildListView {
         // triggered when there are new builds to show
@@ -25,15 +28,12 @@ public class BuildListViewModel {
     private JenkinsRequestManager requestManager;
     private List<Build> builds = new ArrayList<>();
 
-    public BuildListViewModel(JenkinsRequestManager manager, IBuildListView view){
+    public BuildListViewModel(JenkinsRequestManager manager){
         this.requestManager = manager;
-        this.view = view;
-
-        view.startRefreshing();
     }
 
     public void loadBuilds() {
-         requestManager
+         this.subscription = requestManager
                 .getBuildsForJob(jobName, builds.size())
                  .observeOn(AndroidSchedulers.mainThread())
                  .subscribe(new BuildSubscriber());
@@ -53,12 +53,22 @@ public class BuildListViewModel {
         this.builds.addAll(builds);
     }
 
+    public void clearBuilds(){
+        this.builds.clear();
+    }
+
     public int getLastBuildPosition() {
         return builds.size();
     }
 
     public void destroy() {
-        this.view = null;
+        Timber.d("destroy() " + this);
+        if(subscription != null) {
+            subscription.unsubscribe();
+            jobNameSubscription.unsubscribe();
+            view = null;
+            subscription = null;
+        }
     }
 
     public class BuildSubscriber extends Subscriber<List<Build>> {
@@ -71,7 +81,7 @@ public class BuildListViewModel {
 
         @Override
         public void onError(Throwable e) {
-            Timber.d("onError()");
+            Timber.d("onError() - " + BuildListViewModel.this);
             view.stopRefreshing();
 
             e.printStackTrace();
@@ -79,7 +89,7 @@ public class BuildListViewModel {
 
         @Override
         public void onNext(List<Build> builds) {
-            Timber.d("onNext()");
+            Timber.d("onNext()" + BuildListViewModel.this);
             view.stopRefreshing();
 
             int start = getBuilds().size();
@@ -90,8 +100,12 @@ public class BuildListViewModel {
         }
     }
 
-    public void setJob(Long jobId) {
-        requestManager.getJobById(jobId)
+    public void setJob(Long jobId, IBuildListView view) {
+        Timber.d("setJob(" + jobId + ")");
+        this.view = view;
+        view.startRefreshing();
+        clearBuilds();
+        jobNameSubscription = requestManager.getJobById(jobId)
                 .subscribeOn(Schedulers.io())
                 .subscribe(job -> {
                     if (job != null) {

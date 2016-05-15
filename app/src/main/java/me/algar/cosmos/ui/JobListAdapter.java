@@ -1,7 +1,9 @@
 package me.algar.cosmos.ui;
 
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import me.algar.cosmos.R;
 import me.algar.cosmos.data.Job;
+import me.algar.cosmos.ui.views.StatusIcon;
 import timber.log.Timber;
 
 /**
@@ -29,11 +32,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
         @Bind(R.id.job_status)
         public TextView status;
         @Bind(R.id.status_circle)
-        public RelativeLayout statusCircle;
-        @Bind(R.id.status_circle_error_icon)
-        public View statusErrorIcon;
-        @Bind(R.id.status_circle_checkmark)
-        public View statusCheckmarkIcon;
+        public StatusIcon statusCircle;
 
         public ViewHolder(View root) {
             super(root);
@@ -57,6 +56,7 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        long curTime = System.nanoTime();
         Job item = jobList.get(position);
 
         if(item == null){return;}
@@ -64,16 +64,13 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
         holder.jobName.setText(item.name());
         holder.status.setText(item.color());
         if(item.color().equals(Job.FAILURE_COLOR)){
-            holder.statusErrorIcon.setVisibility(View.VISIBLE);
-            holder.statusCheckmarkIcon.setVisibility(View.GONE);
-            holder.statusCircle.setBackground(
-                    holder.itemView.getContext().getResources().getDrawable(R.drawable.red_circle));
+            holder.statusCircle.setStatus(StatusIcon.STATUS_FAILURE);
         } else{
-            holder.statusErrorIcon.setVisibility(View.GONE);
-            holder.statusCheckmarkIcon.setVisibility(View.VISIBLE);
-            holder.statusCircle.setBackground(
-                    holder.itemView.getContext().getResources().getDrawable(R.drawable.green_circle));
+            holder.statusCircle.setStatus(StatusIcon.STATUS_SUCCESS);
         }
+        long endTime = System.nanoTime();
+        long duration  = (endTime - curTime)/1000;//to ms
+        Timber.d("Took: " + duration + "ms to bind");
     }
 
     @Override

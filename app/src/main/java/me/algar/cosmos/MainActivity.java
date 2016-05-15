@@ -18,19 +18,21 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+//
+//        RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
+//            @Override
+//            public void handleError(Throwable e) {
+//                super.handleError(e);
+//                e.printStackTrace();
+//            }
+//        });
 
-        RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
-            @Override
-            public void handleError(Throwable e) {
-                super.handleError(e);
-                e.printStackTrace();
-            }
-        });
-
-        listFragment = new JobListFragment();
+        if(listFragment == null) {
+            listFragment = new JobListFragment();
+        }
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, listFragment)
+                .replace(R.id.fragment_container, listFragment)
                 .commitAllowingStateLoss();
     }
 

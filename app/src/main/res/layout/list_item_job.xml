@@ -18,33 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <RelativeLayout
+        <me.algar.cosmos.ui.views.StatusIcon
             android:id="@+id/status_circle"
+            android:layout_width="@dimen/status_size"
+            android:layout_height="@dimen/status_size"
             android:layout_alignParentLeft="true"
             android:layout_margin="8dp"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:background="@drawable/green_circle">
-
-            <View
-                android:id="@+id/status_circle_error_icon"
-                android:background="@drawable/ic_close_black_24dp"
-                android:backgroundTint="@color/white"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_width="@dimen/icon_size"
-                android:layout_height="@dimen/icon_size" />
-
-            <View
-                android:id="@+id/status_circle_checkmark"
-                android:background="@drawable/ic_check_black_24dp"
-                android:backgroundTint="@color/white"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_width="@dimen/icon_size"
-                android:layout_height="@dimen/icon_size" />
-
-        </RelativeLayout>
+            />
 
         <TextView
             android:id="@+id/job_name"

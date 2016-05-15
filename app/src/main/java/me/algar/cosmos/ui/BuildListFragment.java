@@ -55,9 +55,10 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
-        this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()), this);
-        viewModel.setJob(jobId);
-
+        if(viewModel == null) {
+            this.viewModel = new BuildListViewModel(new JenkinsRequestManager(getContext()));
+            viewModel.setJob(jobId, this);
+        }
 
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
@@ -82,9 +83,9 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     }
 
     @Override
-    public void onDestroyView(){
+    public void onStop(){
         viewModel.destroy();
-        super.onDestroyView();
+        super.onStop();
     }
 
     @Override
@@ -99,7 +100,8 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
     }
 
     public void setJob(Long job) {
+        Timber.d("SetJob("+job+")");
         this.jobId = job;
-        viewModel.setJob(job);
+        viewModel.setJob(job, this);
     }
 }
