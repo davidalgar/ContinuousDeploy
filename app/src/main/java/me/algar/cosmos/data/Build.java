@@ -11,8 +11,9 @@ public class Build implements BuildModel {
     public String url;
     public String responsible; //Should always be the topmost committer from changeSet, if any exists
     public ChangeSet changeSet;
+    private long created;
 
-    public Build(long id, String url, String status, String responsible){
+    public Build(long id, String url, String status, String responsible, long created){
         this.number = id;
         if(url != null) {
             this.url = url;
@@ -31,7 +32,13 @@ public class Build implements BuildModel {
         }
     }
 
-    public static final Mapper<Build> MAPPER = new Mapper<>((number1, status, url1, responsible1) -> new Build(number1, url1, status, responsible1));
+    public static final class Marshal extends BuildModel.BuildMarshal<Marshal> {
+        public Marshal() {
+            super();
+        }
+    }
+
+    public static final Mapper<Build> MAPPER = new Mapper<>((number1, status, url1, responsible1, created) -> new Build(number1, url1, status, responsible1, created));
 
     public String getBuildNumber() {
         return ""+number;
@@ -56,6 +63,11 @@ public class Build implements BuildModel {
     @Override
     public String responsible() {
         return responsible;
+    }
+
+    @Override
+    public long created() {
+        return created;
     }
 
     public void generateResponsible() {

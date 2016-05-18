@@ -11,7 +11,7 @@ import rx.schedulers.Schedulers;
 public class JenkinsService {
 
     static final int JOBS_PER_REQUEST = 50;
-    private static final int BUILDS_PER_REQUEST = 15;
+    static final int BUILDS_PER_REQUEST = 15;
 
     public Observable<Job> getJob(String jobName, int startIndex){
         Retrofit retrofit = NetworkProvider.buildRetrofit();

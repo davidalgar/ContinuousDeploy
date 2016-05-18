@@ -9,12 +9,13 @@ public class Job implements JobModel {
     public String name;
     public String color;
     public List<Build> builds = new ArrayList<>();
+    public long created;
 
 
     public static final Mapper<Job> MAPPER = new Mapper<>(new Mapper.Creator<Job>() {
         @Override
-        public Job create(long _id, String name, String color) {
-            return new Job(_id, name, color);
+        public Job create(long _id, String name, String color, long created) {
+            return new Job(_id, name, color, created);
         }
     });
 
@@ -29,10 +30,11 @@ public class Job implements JobModel {
     }
 
     private long id;
-    public Job(long id, String name, String color) {
+    public Job(long id, String name, String color, long created) {
         this.id = id;
         this.name = name;
         this.color = color;
+        this.created = created;
     }
 
     @Override
@@ -48,5 +50,10 @@ public class Job implements JobModel {
     @Override
     public String color() {
         return color;
+    }
+
+    @Override
+    public long created() {
+        return created;
     }
 }

@@ -26,8 +26,8 @@ public class JobStorage {
 
     public Observable<List<Build>> getBuilds(int startIndex, int endIndex){
         Observable<SqlBrite.Query> builds
-                = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
-                JobModel.SELECT_RANGE,
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME_BUILDS,
+                BuildModel.SELECT_RANGE,
                 "" + startIndex, "" + endIndex);
 
         return builds.map((SqlBrite.Query query) -> {
@@ -41,6 +41,23 @@ public class JobStorage {
             }
             return buildList;
         }).subscribeOn(Schedulers.computation());
+    }
+
+    public Observable<Boolean> isCacheCurrent(int startIndex, int endIndex){
+        // 1) Do items exist in db?
+        //   if no, check meta-data table for last request time
+        //   if yes, check max age of data between indices
+        return Observable.fromCallable(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                //TODO
+                return true;
+            }
+        });
+    }
+
+    private void checkForJobsInCache(int startIndex, int endIndex){
+        // TODO simple COUNT on jobs, should be > endIndex
     }
 
     public Observable<List<Job>> getJobs(int startIndex, int endIndex) {
@@ -65,6 +82,7 @@ public class JobStorage {
     public Boolean insertJobs(List<Job> jobs) {
         boolean success;
         try (BriteDatabase.Transaction transaction = db.newTransaction()) {
+            long created = System.currentTimeMillis();
             for (Job job : jobs) {
                 Cursor cursor = db.query(JobModel.SELECT_BY_NAME, job.name());
 
@@ -73,6 +91,7 @@ public class JobStorage {
                     db.insert(JobModel.TABLE_NAME, new Job.Marshal()
                             .color(job.color)
                             .name(job.name)
+                            .created(created)
                             .asContentValues());
                 }
             }
@@ -120,6 +139,33 @@ public class JobStorage {
             }
             return null;
         });
+    }
+
+    public boolean insertBuilds(List<Build> builds) {
+        boolean success;
+        try (BriteDatabase.Transaction transaction = db.newTransaction()) {
+            long created = System.currentTimeMillis();
+            for (Build build : builds) {
+                Cursor cursor = db.query(BuildModel.SELECT_BY_ID, build.getBuildNumber());
+                //only insert if it doesn't exist in the db
+                //TODO change this to instead remove the item, and replace with the new item
+                if(!cursor.moveToNext()) {
+                    db.insert(BuildModel.TABLE_NAME, new Build.Marshal()
+                            .status(build.status())
+                            .number(build.number())
+                            .url(build.url())
+                            .responsible(build.responsible())
+                            .created(created)
+                            .asContentValues());
+                }
+            }
+            transaction.markSuccessful();
+            success = true;
+        }catch (Exception e){
+            e.printStackTrace();
+            success = false;
+        }
+        return success;
     }
 
     public class ItemNotFoundException extends Exception {

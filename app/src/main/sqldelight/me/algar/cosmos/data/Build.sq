@@ -2,7 +2,8 @@ CREATE TABLE builds (
   number INTEGER NOT NULL PRIMARY KEY,
   status TEXT NOT NULL,
   url TEXT NOT NULL,
-  responsible TEXT
+  responsible TEXT,
+  created INTEGER NOT NULL
 );
 
 select_all:

@@ -1,7 +1,8 @@
 CREATE TABLE jobs (
   _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
-  color TEXT NOT NULL
+  color TEXT NOT NULL,
+  created INTEGER NOT NULL
 );
 
 select_all:
@@ -26,3 +27,9 @@ SELECT *
 FROM jobs
 WHERE name=?
 LIMIT 1;
+
+select_max_age:
+SELECT MIN(created)
+FROM jobs
+LIMIT ?
+OFFSET ?;

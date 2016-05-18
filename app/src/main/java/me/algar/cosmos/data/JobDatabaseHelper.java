@@ -8,7 +8,8 @@ import me.algar.cosmos.data.JobModel;
 
 public class JobDatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_NAME_JOBS = "jobs";
-    private static final int DB_VERSION = 1;
+    public static final String TABLE_NAME_BUILDS = "builds";
+    private static final int DB_VERSION = 2;
 
     public JobDatabaseHelper(Context context) {
         super(context, TABLE_NAME_JOBS, null, DB_VERSION);
@@ -17,13 +18,13 @@ public class JobDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(JobModel.CREATE_TABLE);
-//        db.execSQL(BuildModel.CREATE_TABLE);
+        db.execSQL(BuildModel.CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //TODO proper migration
         db.execSQL("DROP TABLE "+ TABLE_NAME_JOBS);
+        db.execSQL("DROP TABLE "+ TABLE_NAME_BUILDS);
         onCreate(db);
     }
 }
