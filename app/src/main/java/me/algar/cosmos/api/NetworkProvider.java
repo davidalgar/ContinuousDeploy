@@ -16,6 +16,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 /**
  * Created by david.algar on 3/12/16.
@@ -24,12 +25,7 @@ public class NetworkProvider {
     public Context context;
 
     public static OkHttpClient getHttpClient(){
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
-            @Override
-            public void log(String message) {
-                Log.d("API", message);
-            }
-        });
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor(message -> Timber.tag("API").d(message));
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
         File cacheDirectory = CosmosApplication.appContext().getCacheDir();
@@ -37,8 +33,8 @@ public class NetworkProvider {
         Cache cache = new Cache(cacheDirectory, cacheSize);
 
         final OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .readTimeout(15, TimeUnit.SECONDS)
-                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .cache(cache)
                 .addNetworkInterceptor(new StethoInterceptor())

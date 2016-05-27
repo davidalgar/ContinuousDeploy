@@ -14,6 +14,7 @@ import timber.log.Timber;
 public class BuildListViewModel {
     private IBuildListView view;
     private String jobName = "**FAILURE**";
+    private long jobId = -1;
     private Subscription subscription;
     private Subscription jobNameSubscription;
 
@@ -36,31 +37,39 @@ public class BuildListViewModel {
             return;
         }
          this.subscription = requestManager
-                .getBuildsForJob(jobName, builds.size())
+                .getBuildsForJob(jobName, jobId, builds.size())
                  .observeOn(AndroidSchedulers.mainThread())
-                 .subscribe(new BuildSubscriber());
+                 .subscribe(new BuildSubscriber(builds.size()));
     }
 
     public List<Build> getBuilds() {
         return builds;
     }
 
-    public void refreshing() {
-        builds.clear();
+    public void addBuilds(List<Build> newBuilds, int startIndex) {
+        // Remove current page (or partial page, if its the final partial page)
+        int endIndex = startIndex + newBuilds.size();
+        for (int buildIndex = startIndex; buildIndex < builds.size() && buildIndex < endIndex; buildIndex++){
+            this.builds.remove(buildIndex);
+        }
 
-        loadBuilds(0);
-    }
-
-    public void addBuilds(List<Build> builds) {
-        this.builds.addAll(builds);
+        int buildIndex = startIndex;
+        for(Build newBuild : newBuilds){
+            this.builds.add(buildIndex++, newBuild);
+        }
+//        if(this.builds.size() >  startIndex){
+//            int buildIndex = startIndex;
+//            for(int i=0; i<newBuilds.size(); i++){
+//                this.builds.remove(buildIndex++);
+//                this.builds.add(buildIndex, newBuilds.get(i));
+//            }
+//        }else {
+//            this.builds.addAll(newBuilds);
+//        }
     }
 
     public void clearBuilds(){
         this.builds.clear();
-    }
-
-    public int getLastBuildPosition() {
-        return builds.size();
     }
 
     public void destroy() {
@@ -74,6 +83,11 @@ public class BuildListViewModel {
     }
 
     public class BuildSubscriber extends Subscriber<List<Build>> {
+        private final int startIndex;
+
+        public BuildSubscriber(int startIndex) {
+            this.startIndex = startIndex;
+        }
 
         @Override
         public void onCompleted() {
@@ -94,11 +108,10 @@ public class BuildListViewModel {
             Timber.d("onNext()" + BuildListViewModel.this);
             view.stopRefreshing();
 
-            int start = getBuilds().size();
-            addBuilds(builds);
+            addBuilds(builds, startIndex);
             int end = getBuilds().size();
 
-            view.showBuilds(start, end);
+            view.showBuilds(startIndex, end);
         }
     }
 
@@ -107,6 +120,7 @@ public class BuildListViewModel {
         this.view = view;
         view.startRefreshing();
         clearBuilds();
+        this.jobId = jobId;
         jobNameSubscription = requestManager.getJobById(jobId)
                 .subscribeOn(Schedulers.io())
                 .subscribe(job -> {
@@ -115,5 +129,10 @@ public class BuildListViewModel {
                     }
                     loadBuilds(0);
                 });
+    }
+
+    public void refresh() {
+        builds.clear();
+        requestManager.clearBuildCache(jobId).doOnNext(x -> loadBuilds(0));
     }
 }

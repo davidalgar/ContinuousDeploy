@@ -9,7 +9,7 @@ import me.algar.cosmos.data.JobModel;
 public class JobDatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_NAME_JOBS = "jobs";
     public static final String TABLE_NAME_BUILDS = "builds";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
 
     public JobDatabaseHelper(Context context) {
         super(context, TABLE_NAME_JOBS, null, DB_VERSION);

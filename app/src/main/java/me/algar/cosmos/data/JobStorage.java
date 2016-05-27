@@ -16,6 +16,7 @@ import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class JobStorage {
+    private static final long MAX_AGE_MILLIS = 1000*60*60*24; //1day
     private BriteDatabase db;
 
     public JobStorage(Context context) {
@@ -24,11 +25,13 @@ public class JobStorage {
         db = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
     }
 
-    public Observable<List<Build>> getBuilds(int startIndex, int endIndex){
+    public Observable<List<Build>> getBuilds(long jobId, int startIndex, int endIndex){
         Observable<SqlBrite.Query> builds
                 = db.createQuery(JobDatabaseHelper.TABLE_NAME_BUILDS,
-                BuildModel.SELECT_RANGE,
-                "" + startIndex, "" + endIndex);
+                    BuildModel.SELECT_RANGE,
+                    ""+jobId,
+                    "" + endIndex,
+                    "" + startIndex);
 
         return builds.map((SqlBrite.Query query) -> {
             Cursor cursor = query.run();
@@ -43,28 +46,59 @@ public class JobStorage {
         }).subscribeOn(Schedulers.computation());
     }
 
-    public Observable<Boolean> isCacheCurrent(int startIndex, int endIndex){
-        // 1) Do items exist in db?
-        //   if no, check meta-data table for last request time
-        //   if yes, check max age of data between indices
-        return Observable.fromCallable(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                //TODO
-                return true;
-            }
-        });
+    // 1) Do items exist in db?
+    //   if no, check meta-data table for last request time
+    //   if yes, check max age of data between indices
+    public Observable<Boolean> isBuildCacheCurrent(long jobId, int startIndex, int endIndex){
+        long maxAge = System.currentTimeMillis() - MAX_AGE_MILLIS;
+
+        return
+            db.createQuery(
+                    JobDatabaseHelper.TABLE_NAME_BUILDS,
+                    BuildModel.SELECT_MAX_AGE,
+                    ""+jobId,
+                    "" + endIndex,
+                    "" + startIndex)
+                    .map((SqlBrite.Query query) -> {
+                        Cursor cursor = query.run();
+                        if (cursor == null) {
+                            return false;
+                        }
+                        if (cursor.moveToNext()) {
+                            long oldestItem = cursor.getLong(0);
+                            return oldestItem > maxAge;
+                        }
+                        return false;
+                    });
     }
 
-    private void checkForJobsInCache(int startIndex, int endIndex){
-        // TODO simple COUNT on jobs, should be > endIndex
+    public Observable<Boolean> isJobCacheCurrent(int startIndex, int endIndex){
+        long maxAge = System.currentTimeMillis() - MAX_AGE_MILLIS;
+
+        return db.createQuery(
+                        JobDatabaseHelper.TABLE_NAME_JOBS,
+                        JobModel.SELECT_MAX_AGE,
+                        "" + endIndex,
+                        "" + startIndex)
+                        .map((SqlBrite.Query query) -> {
+                            Cursor cursor = query.run();
+                            if (cursor == null) {
+                                return false;
+                            }
+                            if (cursor.moveToNext()) {
+                                long oldestItem = cursor.getLong(0);
+                                return oldestItem > maxAge;
+                            }
+                            return false;
+                        });
     }
 
     public Observable<List<Job>> getJobs(int startIndex, int endIndex) {
         Observable<SqlBrite.Query> jobs
                 = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
                 JobModel.SELECT_RANGE,
-                "" + startIndex, "" + endIndex);
+                "" + endIndex,
+                "" + startIndex);
 
         return jobs.map((SqlBrite.Query query) -> {
             Cursor cursor = query.run();
@@ -111,6 +145,14 @@ public class JobStorage {
                 );
     }
 
+    public Observable<Integer> clearBuildsForJob(long jobId) {
+        return makeObservable(() ->
+                db.delete(BuildModel.TABLE_NAME, "jobId="+jobId))
+                .subscribeOn(Schedulers.computation()
+                );
+    }
+
+
     private static <T> Observable<T> makeObservable(final Callable<T> func) {
         return Observable.create(
                 new Observable.OnSubscribe<T>() {
@@ -155,6 +197,7 @@ public class JobStorage {
                             .number(build.number())
                             .url(build.url())
                             .responsible(build.responsible())
+                            .jobId(build.jobId)
                             .created(created)
                             .asContentValues());
                 }

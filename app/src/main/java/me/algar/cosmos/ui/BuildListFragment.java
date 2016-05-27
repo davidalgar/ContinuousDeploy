@@ -2,6 +2,7 @@ package me.algar.cosmos.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +19,7 @@ import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
 import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
 import me.algar.cosmos.data.Job;
+import me.algar.cosmos.util.RxErrorBus;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
@@ -90,7 +92,8 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
 
     @Override
     public void onRefresh() {
-        viewModel.refreshing();
+        viewModel.refresh();
+        adapter.notifyDataSetChanged();
     }
 
     /*** ViewModel hooks (start/stop refreshing are inherited from parent) */

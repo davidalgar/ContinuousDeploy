@@ -3,22 +3,34 @@ CREATE TABLE builds (
   status TEXT NOT NULL,
   url TEXT NOT NULL,
   responsible TEXT,
-  created INTEGER NOT NULL
+  created INTEGER NOT NULL,
+  jobId INTEGER NOT NULL,
+  FOREIGN KEY(jobId) REFERENCES jobs(_id)
 );
 
 select_all:
 SELECT *
 FROM builds
-WHERE 1=1;
+WHERE jobId=?
+ORDER BY number DESC;
 
 select_range:
 SELECT *
 FROM builds
-WHERE 1=1
-LIMIT ?, ?;
+WHERE jobId=?
+ORDER BY number DESC
+LIMIT ?
+OFFSET ?;
 
 select_by_id:
 SELECT *
 FROM builds
 WHERE number=?
 LIMIT 1;
+
+select_max_age:
+SELECT MIN(created) as oldestRecord
+FROM builds
+WHERE jobId=?
+LIMIT ?
+OFFSET ?;

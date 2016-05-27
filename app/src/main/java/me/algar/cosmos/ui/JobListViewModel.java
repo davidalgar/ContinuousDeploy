@@ -30,7 +30,7 @@ public class JobListViewModel {
     }
 
     public void loadJobs() {
-        if(subscription !=null && !subscription.isUnsubscribed()) {
+        if(subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
         subscription = requestManager
@@ -44,7 +44,7 @@ public class JobListViewModel {
 
     public void refresh() {
         jobs.clear();
-        requestManager.clearCache();
+        requestManager.clearJobCache();
         loadJobs();
     }
 

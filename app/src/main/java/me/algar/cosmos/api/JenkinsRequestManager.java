@@ -9,6 +9,7 @@ import java.util.List;
 import me.algar.cosmos.data.Build;
 import me.algar.cosmos.data.JobStorage;
 import me.algar.cosmos.data.Job;
+import me.algar.cosmos.util.RxErrorBus;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
@@ -16,11 +17,6 @@ import rx.schedulers.Schedulers;
 public class JenkinsRequestManager {
     private static JenkinsRequestManager sInstance;
     private JobStorage db;
-
-    private static final long MAX_CACHE_AGE = 1000*60*5;    //5mins
-
-    private long last_job_req = 0;
-    private long last_build_req = 0;
 
     public static JenkinsRequestManager getInstance(Context context){
         if(sInstance == null){
@@ -33,37 +29,45 @@ public class JenkinsRequestManager {
         db = new JobStorage(context.getApplicationContext());
     }
 
-    public Observable<Job> getJob(String jobName, int startIndex) {
-        return new JenkinsService().getJob(jobName, startIndex);
-    }
-
-    private boolean cacheExpired(long lastRequest){
-        long now = System.currentTimeMillis();
-
-        if((now - lastRequest) > MAX_CACHE_AGE){
-            return true;
-        }
-
-        return false;
-    }
-
     //Convenience unwrapper - this is the more useful form of data, since we don't care about the Job object
-    public Observable<List<Build>> getBuildsForJob(String jobName, int startIndex){
-        Observable<List<Build>> observable = db.getBuilds(startIndex, startIndex + JenkinsService.BUILDS_PER_REQUEST);
+    public Observable<List<Build>> getBuildsForJob(String jobName, long jobId, int startIndex){
+        int endIndex = JenkinsService.getBuildEndIndex(startIndex);
+        Observable<List<Build>> cachedBuilds = db.getBuilds(jobId, startIndex, endIndex);
 
-        if(cacheExpired(last_build_req)){
-            new JenkinsService().getJob(jobName, startIndex)
-                    .map(Job::getBuilds)
-                    .map(builds -> {
-                        List<Build> newList = new ArrayList<>();
-                        for (Build build : builds) {
-                            if (build != null) {
-                                build.generateResponsible();
-                                newList.add(build);
-                            }
+        db.isBuildCacheCurrent(jobId, startIndex, endIndex)
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                        //do nothing
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        makeBuildsNetworkCall(jobName, jobId, startIndex);
+                    }
+
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        if(!aBoolean){
+                            makeBuildsNetworkCall(jobName, jobId, startIndex);
                         }
-                        return newList;
-                    })
+                    }
+                });
+
+        return cachedBuilds;
+    }
+
+    private void makeBuildsNetworkCall(String jobName, long jobId, int startIndex){
+        new JenkinsService().getJob(jobName, startIndex)
+                .map(job -> {
+                    List<Build> builds = job.builds;
+                    for(Build build : builds){
+                        build.jobId = jobId;
+                        build.generateResponsible();
+                    }
+                    return builds;
+                })
+                .map(this::notNull)
                 .subscribe(new Subscriber<List<Build>>() {
                     @Override
                     public void onCompleted() {
@@ -72,21 +76,24 @@ public class JenkinsRequestManager {
 
                     @Override
                     public void onError(Throwable e) {
-
+                        RxErrorBus.getInstance().errorHappened(new RxErrorBus.Error("Could not load builds",e));
                     }
 
                     @Override
                     public void onNext(List<Build> builds) {
                         db.insertBuilds(builds);
-                        if(startIndex == 0){
-                            last_build_req = System.currentTimeMillis();
-                        }
                     }
                 });
+    }
+
+    private <T> List<T> notNull(List<T> list){
+        List<T> result = new ArrayList<T>();
+        for(T item : list){
+            if(item != null){
+                result.add(item);
+            }
         }
-
-
-        return observable;
+        return result;
     }
 
     public Observable<Job> getJobById(Long jobId){
@@ -94,38 +101,58 @@ public class JenkinsRequestManager {
     }
 
     public Observable<List<Job>> getJobs(int startIndex) {
-        // return database observable
-        Observable<List<Job>> observable = db.getJobs(startIndex, startIndex + JenkinsService.JOBS_PER_REQUEST);
+        int endIndex = JenkinsService.getJobEndIndex(startIndex);
+        Observable<List<Job>> observable = db.getJobs(startIndex, endIndex);
 
-        if(cacheExpired(last_job_req)) {
-            // then subscribe to the Service observable to update the DB when api response is received
-            new JenkinsService().getJobs(startIndex)
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new Subscriber<List<Job>>() {
-                        @Override
-                        public void onCompleted() {
-                            // Do nothing?
-                        }
+        db.isJobCacheCurrent(startIndex, endIndex)
+                .subscribe(new Subscriber<Boolean>() {
+                    @Override
+                    public void onCompleted() {
+                        //do nothing
+                    }
 
-                        @Override
-                        public void onError(Throwable e) {
-                            e.printStackTrace();
-                        }
+                    @Override
+                    public void onError(Throwable e) {
+                        makeJobsNetworkCall(startIndex, endIndex);
+                    }
 
-                        @Override
-                        public void onNext(List<Job> jobs) {
-                            db.insertJobs(jobs);
-                            if (startIndex == 0) {
-                                last_job_req = System.currentTimeMillis();
-                            }
+                    @Override
+                    public void onNext(Boolean aBoolean) {
+                        if(!aBoolean){
+                            makeJobsNetworkCall(startIndex, endIndex);
                         }
-                    });
-        }
+                    }
+                });
 
         return observable;
     }
 
-    public void clearCache() {
+    private void makeJobsNetworkCall(int startIndex, int endIndex){
+        new JenkinsService().getJobs(startIndex, endIndex)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Subscriber<List<Job>>() {
+                    @Override
+                    public void onCompleted() {
+                        // Do nothing?
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onNext(List<Job> jobs) {
+                        db.insertJobs(jobs);
+                    }
+                });
+    }
+
+    public void clearJobCache() {
         db.clearJobs().observeOn(Schedulers.computation()).subscribe();
+    }
+
+    public Observable<Integer> clearBuildCache(long jobId) {
+        return db.clearBuildsForJob(jobId).observeOn(Schedulers.computation());
     }
 }

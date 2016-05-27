@@ -10,8 +10,8 @@ import rx.schedulers.Schedulers;
 
 public class JenkinsService {
 
-    static final int JOBS_PER_REQUEST = 50;
-    static final int BUILDS_PER_REQUEST = 15;
+    private static final int JOBS_PER_REQUEST = 50;
+    private static final int BUILDS_PER_REQUEST = 15;
 
     public Observable<Job> getJob(String jobName, int startIndex){
         Retrofit retrofit = NetworkProvider.buildRetrofit();
@@ -24,10 +24,10 @@ public class JenkinsService {
                 .subscribeOn(Schedulers.io());
     }
 
-    public Observable<List<Job>> getJobs(int startIndex){
+    public Observable<List<Job>> getJobs(int startIndex, int endIndex){
         Retrofit retrofit = NetworkProvider.buildRetrofit();
 
-        String path = createJobsTreeParam(startIndex);
+        String path = createJobsTreeParam(startIndex, endIndex);
 
         JenkinsApi jenkinsService = retrofit.create(JenkinsApi.class);
         return jenkinsService
@@ -36,14 +36,23 @@ public class JenkinsService {
                 .subscribeOn(Schedulers.io());
     }
 
-    private String createJobsTreeParam(int startIndex){
-        return "jobs[name,color]{" + (startIndex) + "," + (startIndex + JOBS_PER_REQUEST) + "}";
+    private String createJobsTreeParam(int startIndex, int endIndex){
+        return "jobs[name,color]{" + (startIndex) + "," + (endIndex) + "}";
     }
 
     private String createSingleJobTreeParam(int startIndex){
         String tree = "builds[number,url,result,artifacts[*],changeSet[items[msg,author[fullName]]]]";
         return tree+"{" + (startIndex) + "," + (startIndex + BUILDS_PER_REQUEST) + "}";
     }
+
+    public static int getJobEndIndex(int startIndex) {
+        return startIndex + JenkinsService.JOBS_PER_REQUEST;
+    }
+
+    public static int getBuildEndIndex(int startIndex) {
+        return startIndex + JenkinsService.BUILDS_PER_REQUEST;
+    }
+
 
     /*
     Unused code for getting single build data

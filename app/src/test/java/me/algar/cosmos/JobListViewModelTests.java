@@ -61,7 +61,7 @@ public class JobListViewModelTests {
         vm.refresh();
 
         //should clear cache after refresh
-        verify(mockRequestManager).clearCache();
+        verify(mockRequestManager).clearJobCache();
         verify(mockRequestManager, times(2)).getJobs(0); // once on creation, once for refresh
     }
 }

@@ -47,7 +47,6 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent,
                                          int viewType) {
-        Timber.d("onCreateViewHolder()");
         View listItemRoot = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.list_item_job, parent, false);
 
@@ -70,7 +69,6 @@ public class JobListAdapter extends RecyclerView.Adapter<JobListAdapter.ViewHold
         }
         long endTime = System.nanoTime();
         long duration  = (endTime - curTime)/1000;//to ms
-        Timber.d("Took: " + duration + "ms to bind");
     }
 
     @Override
