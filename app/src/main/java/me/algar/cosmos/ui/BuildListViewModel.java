@@ -1,5 +1,7 @@
 package me.algar.cosmos.ui;
 
+import android.support.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +14,18 @@ import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public class BuildListViewModel {
+    @Nullable
     private IBuildListView view;
     private String jobName = "**FAILURE**";
     private long jobId = -1;
-    private Subscription subscription;
+    private List<Subscription> subscriptions = new ArrayList<>();
+    @Nullable
     private Subscription jobNameSubscription;
 
+    private boolean allBuildsLoaded = false;
+
     public interface IBuildListView {
-        // triggered when there are new builds to show
+        // triggered when there are new(or updated) builds to show
         void showBuilds(int rangeStart, int rangeEnd);
         void stopRefreshing();
         void startRefreshing();
@@ -32,40 +38,26 @@ public class BuildListViewModel {
         this.requestManager = manager;
     }
 
-    public void loadBuilds(int page) {
-        if(builds.size() < page * 15){
+    public void loadMoreBuilds() {
+        if(allBuildsLoaded){
             return;
         }
-         this.subscription = requestManager
+        Subscriber<List<Build>> subscriber = new BuildSubscriber();
+
+        Subscription subscription = requestManager
                 .getBuildsForJob(jobName, jobId, builds.size())
-                 .observeOn(AndroidSchedulers.mainThread())
-                 .subscribe(new BuildSubscriber(builds.size()));
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
+
+        subscriptions.add(subscription);
     }
 
     public List<Build> getBuilds() {
         return builds;
     }
 
-    public void addBuilds(List<Build> newBuilds, int startIndex) {
-        // Remove current page (or partial page, if its the final partial page)
-        int endIndex = startIndex + newBuilds.size();
-        for (int buildIndex = startIndex; buildIndex < builds.size() && buildIndex < endIndex; buildIndex++){
-            this.builds.remove(buildIndex);
-        }
-
-        int buildIndex = startIndex;
-        for(Build newBuild : newBuilds){
-            this.builds.add(buildIndex++, newBuild);
-        }
-//        if(this.builds.size() >  startIndex){
-//            int buildIndex = startIndex;
-//            for(int i=0; i<newBuilds.size(); i++){
-//                this.builds.remove(buildIndex++);
-//                this.builds.add(buildIndex, newBuilds.get(i));
-//            }
-//        }else {
-//            this.builds.addAll(newBuilds);
-//        }
+    public boolean addOrUpdateBuilds(List<Build> newBuilds) {
+        return this.builds.addAll(newBuilds);
     }
 
     public void clearBuilds(){
@@ -74,44 +66,58 @@ public class BuildListViewModel {
 
     public void destroy() {
         Timber.d("destroy() " + this);
-        if(subscription != null) {
-            subscription.unsubscribe();
+        if(!subscriptions.isEmpty()) {
+            for(Subscription sub : subscriptions) {
+                sub.unsubscribe();
+            }
+            subscriptions.clear();
+        }
+        view = null;
+
+        if (jobNameSubscription != null) {
             jobNameSubscription.unsubscribe();
-            view = null;
-            subscription = null;
         }
     }
 
     public class BuildSubscriber extends Subscriber<List<Build>> {
-        private final int startIndex;
 
-        public BuildSubscriber(int startIndex) {
-            this.startIndex = startIndex;
+        public BuildSubscriber() {
+        }
+
+        @Override
+        public void onNext(List<Build> builds) {
+            if (view != null) {
+                view.stopRefreshing();
+            }
+
+            if(builds.isEmpty()){
+                allBuildsLoaded = true;
+            }
+
+            if(addOrUpdateBuilds(builds)) {
+                // find range we inserted/updated so we can notify recyclerview
+                int start = getBuilds().indexOf(builds.get(0));
+                int end = getBuilds().indexOf(builds.get(builds.size()-1));
+                view.showBuilds(start, end);
+            }
         }
 
         @Override
         public void onCompleted() {
             Timber.d("onCompleted()");
-            view.stopRefreshing();
+            if (view != null) {
+                view.stopRefreshing();
+            }
         }
 
         @Override
         public void onError(Throwable e) {
             Timber.d("onError() - " + BuildListViewModel.this);
-            view.stopRefreshing();
+            if (view != null) {
+                view.stopRefreshing();
+            }
 
             e.printStackTrace();
-        }
-
-        @Override
-        public void onNext(List<Build> builds) {
-            Timber.d("onNext()" + BuildListViewModel.this);
-            view.stopRefreshing();
-
-            addBuilds(builds, startIndex);
-            int end = getBuilds().size();
-
-            view.showBuilds(startIndex, end);
         }
     }
 
@@ -127,12 +133,13 @@ public class BuildListViewModel {
                     if (job != null) {
                         this.jobName = job.name;
                     }
-                    loadBuilds(0);
+                    allBuildsLoaded = false;
+                    loadMoreBuilds();
                 });
     }
 
     public void refresh() {
         builds.clear();
-        requestManager.clearBuildCache(jobId).doOnNext(x -> loadBuilds(0));
+        requestManager.clearBuildCache(jobId).doOnNext(x -> loadMoreBuilds());
     }
 }

@@ -2,26 +2,14 @@ package me.algar.cosmos.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import icepick.Icepick;
 import icepick.State;
-import jp.wasabeef.recyclerview.animators.SlideInUpAnimator;
-import me.algar.cosmos.R;
 import me.algar.cosmos.api.JenkinsRequestManager;
-import me.algar.cosmos.data.Job;
-import me.algar.cosmos.util.RxErrorBus;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import timber.log.Timber;
 
 public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.ViewHolder>
@@ -67,7 +55,7 @@ public class BuildListFragment extends RecyclerViewFragment<BuildListAdapter.Vie
             public void onLoadMore(int page, int totalItemsCount) {
                 Timber.d("Page: " + page + "  totalItems: " + totalItemsCount);
 
-                viewModel.loadBuilds(page);
+                viewModel.loadMoreBuilds();
             }
         });
 

@@ -25,12 +25,12 @@ public class JobStorage {
         db = sqlBrite.wrapDatabaseHelper(openHelper, Schedulers.io());
     }
 
-    public Observable<List<Build>> getBuilds(long jobId, int startIndex, int endIndex){
+    public Observable<List<Build>> getBuilds(long jobId, int limit, int startIndex){
         Observable<SqlBrite.Query> builds
                 = db.createQuery(JobDatabaseHelper.TABLE_NAME_BUILDS,
                     BuildModel.SELECT_RANGE,
                     ""+jobId,
-                    "" + endIndex,
+                    "" + limit,
                     "" + startIndex);
 
         return builds.map((SqlBrite.Query query) -> {
@@ -49,7 +49,7 @@ public class JobStorage {
     // 1) Do items exist in db?
     //   if no, check meta-data table for last request time
     //   if yes, check max age of data between indices
-    public Observable<Boolean> isBuildCacheCurrent(long jobId, int startIndex, int endIndex){
+    public Observable<Boolean> isBuildCacheCurrent(long jobId, int limit, int startIndex){
         long maxAge = System.currentTimeMillis() - MAX_AGE_MILLIS;
 
         return
@@ -57,7 +57,7 @@ public class JobStorage {
                     JobDatabaseHelper.TABLE_NAME_BUILDS,
                     BuildModel.SELECT_MAX_AGE,
                     ""+jobId,
-                    "" + endIndex,
+                    "" + limit,
                     "" + startIndex)
                     .map((SqlBrite.Query query) -> {
                         Cursor cursor = query.run();

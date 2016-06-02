@@ -31,10 +31,9 @@ public class JenkinsRequestManager {
 
     //Convenience unwrapper - this is the more useful form of data, since we don't care about the Job object
     public Observable<List<Build>> getBuildsForJob(String jobName, long jobId, int startIndex){
-        int endIndex = JenkinsService.getBuildEndIndex(startIndex);
-        Observable<List<Build>> cachedBuilds = db.getBuilds(jobId, startIndex, endIndex);
+        Observable<List<Build>> cachedBuilds = db.getBuilds(jobId, JenkinsService.BUILDS_PER_REQUEST, startIndex);
 
-        db.isBuildCacheCurrent(jobId, startIndex, endIndex)
+        db.isBuildCacheCurrent(jobId, JenkinsService.BUILDS_PER_REQUEST, startIndex)
                 .subscribe(new Subscriber<Boolean>() {
                     @Override
                     public void onCompleted() {
