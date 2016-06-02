@@ -51,7 +51,6 @@ public class JobStorage {
     //   if yes, check max age of data between indices
     public Observable<Boolean> isBuildCacheCurrent(long jobId, int limit, int startIndex){
         long maxAge = System.currentTimeMillis() - MAX_AGE_MILLIS;
-
         return
             db.createQuery(
                     JobDatabaseHelper.TABLE_NAME_BUILDS,
@@ -66,6 +65,7 @@ public class JobStorage {
                         }
                         if (cursor.moveToNext()) {
                             long oldestItem = cursor.getLong(0);
+                            Timber.d("Oldest : "+oldestItem);
                             return oldestItem > maxAge;
                         }
                         return false;

@@ -13,6 +13,7 @@ import me.algar.cosmos.util.RxErrorBus;
 import rx.Observable;
 import rx.Subscriber;
 import rx.schedulers.Schedulers;
+import timber.log.Timber;
 
 public class JenkinsRequestManager {
     private static JenkinsRequestManager sInstance;
@@ -48,7 +49,10 @@ public class JenkinsRequestManager {
                     @Override
                     public void onNext(Boolean aBoolean) {
                         if(!aBoolean){
+                            Timber.d("Cache expired for start="+startIndex);
                             makeBuildsNetworkCall(jobName, jobId, startIndex);
+                        }else{
+                            Timber.d("Cache hit for start="+startIndex);
                         }
                     }
                 });

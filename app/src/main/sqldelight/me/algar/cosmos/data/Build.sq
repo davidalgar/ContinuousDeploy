@@ -30,7 +30,9 @@ LIMIT 1;
 
 select_max_age:
 SELECT MIN(created) as oldestRecord
+FROM
+(SELECT created
 FROM builds
 WHERE jobId=?
 LIMIT ?
-OFFSET ?;
+OFFSET ?);

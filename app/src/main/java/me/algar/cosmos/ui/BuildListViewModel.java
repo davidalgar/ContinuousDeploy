@@ -18,9 +18,10 @@ public class BuildListViewModel {
     private IBuildListView view;
     private String jobName = "**FAILURE**";
     private long jobId = -1;
-    private List<Subscription> subscriptions = new ArrayList<>();
     @Nullable
     private Subscription jobNameSubscription;
+    @Nullable
+    private Subscription singleSubscription;
 
     private boolean allBuildsLoaded = false;
 
@@ -44,12 +45,19 @@ public class BuildListViewModel {
         }
         Subscriber<List<Build>> subscriber = new BuildSubscriber();
 
-        Subscription subscription = requestManager
+
+        // don't need the old subscription any more, since we're paging
+        // (if not paging you'd only have a single subscription)
+        if(singleSubscription != null) {
+            singleSubscription.unsubscribe();
+        }
+
+        // re-subscribe, but to larger size query ?
+        singleSubscription = requestManager
                 .getBuildsForJob(jobName, jobId, builds.size())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(subscriber);
-
-        subscriptions.add(subscription);
+//        subscriptions.add(subscription);
     }
 
     public List<Build> getBuilds() {
@@ -66,11 +74,8 @@ public class BuildListViewModel {
 
     public void destroy() {
         Timber.d("destroy() " + this);
-        if(!subscriptions.isEmpty()) {
-            for(Subscription sub : subscriptions) {
-                sub.unsubscribe();
-            }
-            subscriptions.clear();
+        if(singleSubscription != null){
+            singleSubscription.unsubscribe();
         }
         view = null;
 

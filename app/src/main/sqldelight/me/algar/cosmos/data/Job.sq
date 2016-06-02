@@ -30,7 +30,9 @@ WHERE name=?
 LIMIT 1;
 
 select_max_age:
-SELECT MIN(created)
+SELECT MIN(created) as oldestRecord
+FROM
+(SELECT created
 FROM jobs
 LIMIT ?
-OFFSET ?;
+OFFSET ?);
