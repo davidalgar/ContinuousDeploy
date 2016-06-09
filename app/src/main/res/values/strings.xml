@@ -16,4 +16,6 @@
     <string name="success">Success</string>
     <string name="failure">Failure</string>
     <string name="load_complete">Refresh Complete</string>
+    <string name="search_for_job">Search for job</string>
+    <string name="action_search">Search</string>
 </resources>

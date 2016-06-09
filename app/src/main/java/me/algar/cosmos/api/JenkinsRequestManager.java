@@ -158,4 +158,8 @@ public class JenkinsRequestManager {
     public Observable<Integer> clearBuildCache(long jobId) {
         return db.clearBuildsForJob(jobId).observeOn(Schedulers.computation());
     }
+
+    public Observable<List<Job>> searchForJobs(String searchText) {
+         return db.searchForJobs(searchText);
+    }
 }

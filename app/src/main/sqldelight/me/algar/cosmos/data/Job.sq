@@ -2,7 +2,9 @@ CREATE TABLE jobs (
   _id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   color TEXT NOT NULL,
-  created INTEGER NOT NULL
+  created INTEGER NOT NULL,
+  favorite INTEGER NOT NULL,
+  favorite_local INTEGER NOT NULL
 );
 
 select_all:
@@ -36,3 +38,10 @@ FROM
 FROM jobs
 LIMIT ?
 OFFSET ?);
+
+
+search_by_name:
+SELECT *
+FROM jobs
+WHERE name
+LIKE '%?%';

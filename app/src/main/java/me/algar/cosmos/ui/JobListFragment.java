@@ -100,7 +100,7 @@ public class JobListFragment extends RecyclerViewFragment<JobListAdapter.ViewHol
         @Override
         public void onNext(List<Job> userDataResponse) {
             stopRefreshing();
-            Timber.d("got " + userDataResponse.size());
+            Timber.d("got %s", userDataResponse.size());
             int rangeStart = viewModel.getLastJobPosition();
             viewModel.addJobs(userDataResponse);
             adapter.notifyItemRangeInserted(rangeStart, viewModel.getLastJobPosition());

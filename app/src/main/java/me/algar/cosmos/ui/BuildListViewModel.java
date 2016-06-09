@@ -91,6 +91,7 @@ public class BuildListViewModel {
 
         @Override
         public void onNext(List<Build> builds) {
+            Timber.d("Adding builds: "+builds.size());
             if (view != null) {
                 view.stopRefreshing();
             }

@@ -15,8 +15,20 @@ import rx.Subscriber;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
+
+/*
+favorite = favorite_local || favorite
+
+during sync:
+
+if(favorite_local & ! favorite){
+    // fire request to update
+}
+
+ */
+
 public class JobStorage {
-    private static final long MAX_AGE_MILLIS = 1000*60*60*24; //1day
+    private static final long MAX_AGE_MILLIS = 1000*60; //60s
     private BriteDatabase db;
 
     public JobStorage(Context context) {
@@ -103,7 +115,7 @@ public class JobStorage {
         return jobs.map((SqlBrite.Query query) -> {
             Cursor cursor = query.run();
             List<Job> jobList = new ArrayList<>();
-            if (cursor == null) {
+            if (cursor == null || cursor.getCount() == 0) {
                 return jobList;
             }
             while (cursor.moveToNext()) {
@@ -126,6 +138,8 @@ public class JobStorage {
                             .color(job.color)
                             .name(job.name)
                             .created(created)
+                            .favorite(Job.NOT_FAVORITE)
+                            .favorite_local(Job.NOT_FAVORITE)
                             .asContentValues());
                 }
             }
@@ -209,6 +223,24 @@ public class JobStorage {
             success = false;
         }
         return success;
+    }
+
+    public Observable<List<Job>> searchForJobs(String searchText) {
+
+        Observable<SqlBrite.Query> jobs
+                = db.createQuery(JobDatabaseHelper.TABLE_NAME_JOBS,
+                JobModel.SEARCH_BY_NAME.replace("?",searchText));
+        return jobs.map((SqlBrite.Query query) -> {
+            Cursor cursor = query.run();
+            if (cursor == null) {
+                return null;
+            }
+            List<Job> results = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                results.add(Job.MAPPER.map(cursor));
+            }
+            return results;
+        });
     }
 
     public class ItemNotFoundException extends Exception {
